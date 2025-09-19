@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* Estilos do dashboard para login e visualização dos dados */
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #f8f9fa;
@@ -18,32 +17,40 @@
             padding: 20px;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start; /* Altera para alinhar ao topo em telas grandes */
             min-height: 100vh;
             box-sizing: border-box;
         }
+
         .login-container, .dashboard-container {
             width: 100%;
-            max-width: 600px;
+            /* Aumentando a largura máxima para exibir mais dados */
+            max-width: 1400px;
             background-color: #fff;
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
+            margin-top: 20px;
         }
+
         .dashboard-container {
             display: none;
-            max-width: 1200px;
+            /* Usar margem automática para centralizar */
+            margin-left: auto;
+            margin-right: auto;
         }
+
         h1 {
             text-align: center;
             color: #007bff;
             margin-bottom: 25px;
             font-weight: 700;
         }
+
         .form-group { margin-bottom: 1rem; }
         label { display: block; margin-bottom: .5rem; font-weight: 500; color: #555; }
-        input {
+        input[type="email"], input[type="password"] {
             width: 100%;
             padding: 10px 12px;
             border: 1px solid #ccc;
@@ -51,35 +58,52 @@
             font-size: 16px;
             box-sizing: border-box;
         }
+        
         button {
-            width: 100%;
-            padding: 12px;
+            padding: 12px 20px;
             background-color: #007bff;
             color: #fff;
             border: none;
             border-radius: 4px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 500;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
-        button:hover { background-color: #0056b3; }
-        #logoutBtn { background-color: #dc3545; margin-top: 20px; }
+        
+        .login-container button { width: 100%; margin-top: 10px; }
+        .dashboard-controls { display: flex; justify-content: flex-end; margin-bottom: 15px; }
+
+        #logoutBtn { 
+            background-color: #dc3545; 
+            margin-left: 15px;
+            width: auto;
+        }
         #logoutBtn:hover { background-color: #c82333; }
+        
         .error-message {
             color: #dc3545;
             text-align: center;
             margin-top: 10px;
         }
+
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
             font-size: 14px;
+            white-space: nowrap; /* Impede que o texto quebre dentro das células */
         }
         th, td {
             border: 1px solid #ddd;
-            padding: 8px;
+            padding: 10px; /* Aumenta o padding */
             text-align: left;
+            min-width: 120px; /* Garante uma largura mínima para as colunas */
         }
         th {
             background-color: #007bff;
@@ -88,8 +112,44 @@
             top: 0;
         }
         tr:nth-child(even) { background-color: #f2f2f2; }
-        .table-container {
-            overflow-x: auto;
+        
+        /* Estilos para a funcionalidade de edição */
+        .editable-cell input {
+            width: 100%;
+            box-sizing: border-box;
+            border: none;
+            padding: 0;
+            margin: 0;
+            background-color: transparent;
+        }
+        .editable-cell {
+            padding: 0 !important; /* Remove padding na célula para o input ocupar o espaço */
+        }
+        .action-cell {
+            min-width: 80px;
+            text-align: center;
+        }
+        .action-cell button {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin-right: 5px;
+        }
+        .save-btn { background-color: #28a745; }
+        .save-btn:hover { background-color: #218838; }
+
+        /* Responsividade para telas menores */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: 15px;
+            }
+            .dashboard-controls {
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+            .dashboard-controls button {
+                width: 48%;
+                margin: 5px 0;
+            }
         }
     </style>
 </head>
@@ -112,6 +172,10 @@
 
     <div class="dashboard-container" id="dashboardContainer">
         <h1>Dashboard de Clientes</h1>
+        <div class="dashboard-controls">
+            <button id="logoutBtn">Sair</button>
+        </div>
+        
         <div class="table-container">
             <table id="data-table">
                 <thead>
@@ -123,25 +187,23 @@
                         <th>Data de Nascimento</th>
                         <th>Celular</th>
                         <th>Email</th>
-                        <th>Trabalho</th>
-                        <th>Rua e nº</th>
+                        <th>Com o que você trabalha</th>
+                        <th>Nome da rua e nº</th>
                         <th>Bairro</th>
                         <th>CEP</th>
                         <th>Plano</th>
                         <th>Modelo</th>
                         <th>Forma de Pagamento</th>
                         <th>Timestamp</th>
+                        <th>Ações</th> 
                     </tr>
                 </thead>
                 <tbody id="data-body">
-                    <!-- Dados serão inseridos aqui pelo JS -->
-                </tbody>
+                    </tbody>
             </table>
         </div>
-        <button id="logoutBtn">Sair</button>
     </div>
 
-    <!-- CDNs para Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
@@ -165,8 +227,152 @@
         const loginError = document.getElementById('loginError');
         const dataBody = document.getElementById('data-body');
         const logoutBtn = document.getElementById('logoutBtn');
+        
+        // Mapeamento dos campos da tabela para as chaves do Firestore
+        const FIELD_NAMES = [
+            'Nome completo', 'Tipo de Cadastro', 'CPF', 'CNPJ', 'Data de Nascimento', 'Celular', 'Email', 
+            'Com o que você trabalha', 'Nome da rua e nº', 'Bairro', 'CEP', 'Plano', 'Modelo', 'Forma de Pagamento'
+        ];
+        
+        let currentlyEditingRowId = null; // Rastreia a linha atualmente em modo de edição
+        
+        // --- FUNÇÕES DE EDIÇÃO ---
 
-        // Monitora o estado de autenticação para exibir a página correta
+        function enableEdit(rowId) {
+            // Se já houver uma linha em edição, salva ou cancela a edição anterior
+            if (currentlyEditingRowId && currentlyEditingRowId !== rowId) {
+                // Aqui você pode adicionar um aviso ou forçar o salvamento, mas para eficiência, vamos ignorar a anterior.
+            }
+            currentlyEditingRowId = rowId;
+            
+            const row = document.getElementById(`row-${rowId}`);
+            if (!row) return;
+
+            // 1. Torna as células editáveis
+            row.querySelectorAll('.data-cell').forEach((cell, index) => {
+                const fieldName = FIELD_NAMES[index];
+                const currentValue = cell.textContent.trim();
+
+                // Para campos longos (Nome completo, Email, Rua), use input type=text.
+                // Outros campos importantes (CPF, Celular, etc.) também são tratados como texto.
+                let input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentValue;
+                input.setAttribute('data-field', fieldName);
+                input.setAttribute('data-id', rowId);
+                
+                cell.innerHTML = '';
+                cell.classList.add('editable-cell');
+                cell.appendChild(input);
+            });
+            
+            // 2. Muda o botão 'Editar' para 'Salvar'
+            const actionCell = row.querySelector('.action-cell');
+            actionCell.innerHTML = `
+                <button class="save-btn" data-id="${rowId}">Salvar</button>
+                <button class="cancel-btn" data-id="${rowId}">Cancelar</button>
+            `;
+            
+            // Adiciona listeners para os novos botões
+            actionCell.querySelector('.save-btn').addEventListener('click', () => saveEdit(rowId));
+            actionCell.querySelector('.cancel-btn').addEventListener('click', () => cancelEdit(rowId));
+        }
+
+        async function saveEdit(rowId) {
+            const row = document.getElementById(`row-${rowId}`);
+            const dataToUpdate = {};
+            
+            // 1. Coleta os novos dados
+            let allValid = true;
+            row.querySelectorAll('input[data-field]').forEach(input => {
+                const fieldName = input.getAttribute('data-field');
+                dataToUpdate[fieldName] = input.value;
+            });
+
+            if (!allValid) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            // 2. Salva no Firebase
+            try {
+                await db.collection('cadastros').doc(rowId).update(dataToUpdate);
+                alert('✅ Alteração salva com sucesso!');
+                
+                // 3. Recarrega os dados (ou reverte para o modo visual com os novos dados)
+                currentlyEditingRowId = null;
+                loadData(); // Mais simples e seguro recarregar a tabela
+                
+            } catch (error) {
+                console.error("Erro ao salvar no Firestore: ", error);
+                alert(`❌ Erro ao salvar: ${error.message}`);
+            }
+        }
+        
+        function cancelEdit(rowId) {
+            currentlyEditingRowId = null;
+            loadData(); // Recarrega os dados originais
+        }
+
+        // --- FUNÇÕES DE AUTENTICAÇÃO E CARREGAMENTO ---
+
+        // Carregar dados do Firestore
+        async function loadData() {
+            // Limpa a tabela antes de carregar
+            dataBody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Carregando dados...</td></tr>';
+
+            try {
+                // Obtém os dados e ordena por Timestamp
+                const snapshot = await db.collection('cadastros').orderBy('Timestamp', 'desc').get();
+                dataBody.innerHTML = '';
+                
+                if (snapshot.empty) {
+                     dataBody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Nenhum cadastro encontrado.</td></tr>';
+                     return;
+                }
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const rowId = doc.id;
+                    const row = document.createElement('tr');
+                    row.id = `row-${rowId}`;
+                    
+                    const timestamp = data.Timestamp ? new Date(data.Timestamp.seconds * 1000).toLocaleString('pt-BR') : 'N/A';
+                    
+                    let rowHtml = '';
+
+                    // Adiciona as células de dados
+                    FIELD_NAMES.forEach(fieldName => {
+                        const cellContent = data[fieldName] || '';
+                        // Adiciona a classe data-cell para identificação na edição
+                        rowHtml += `<td class="data-cell">${cellContent}</td>`;
+                    });
+
+                    // Adiciona a célula de Timestamp
+                    rowHtml += `<td class="data-cell">${timestamp}</td>`;
+                    
+                    // Adiciona a célula de Ações
+                    rowHtml += `
+                        <td class="action-cell">
+                            <button class="edit-btn" data-id="${rowId}">Editar</button>
+                        </td>
+                    `;
+
+                    row.innerHTML = rowHtml;
+                    dataBody.appendChild(row);
+
+                    // Adiciona listener para o botão de edição
+                    row.querySelector('.edit-btn').addEventListener('click', (e) => {
+                        enableEdit(e.target.dataset.id);
+                    });
+                });
+            } catch (error) {
+                console.error("Erro ao carregar dados do Firestore: ", error);
+                dataBody.innerHTML = `<tr><td colspan="16" style="color: #dc3545; text-align:center;">Erro ao carregar dados: ${error.message}</td></tr>`;
+            }
+        }
+
+        // Monitora o estado de autenticação
         auth.onAuthStateChanged((user) => {
             if (user) {
                 loginContainer.style.display = 'none';
@@ -195,40 +401,6 @@
         logoutBtn.addEventListener('click', () => {
             auth.signOut();
         });
-
-        // Carregar dados do Firestore
-        async function loadData() {
-            try {
-                const snapshot = await db.collection('cadastros').orderBy('Timestamp', 'desc').get();
-                dataBody.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const row = document.createElement('tr');
-                    const timestamp = data.Timestamp ? new Date(data.Timestamp.seconds * 1000).toLocaleString('pt-BR') : '';
-
-                    row.innerHTML = `
-                        <td>${data['Nome completo'] || ''}</td>
-                        <td>${data['Tipo de Cadastro'] || ''}</td>
-                        <td>${data['CPF'] || ''}</td>
-                        <td>${data['CNPJ'] || ''}</td>
-                        <td>${data['Data de Nascimento'] || ''}</td>
-                        <td>${data['Celular'] || ''}</td>
-                        <td>${data['Email'] || ''}</td>
-                        <td>${data['Com o que você trabalha'] || ''}</td>
-                        <td>${data['Nome da rua e nº'] || ''}</td>
-                        <td>${data['Bairro'] || ''}</td>
-                        <td>${data['CEP'] || ''}</td>
-                        <td>${data['Plano'] || ''}</td>
-                        <td>${data['Modelo'] || ''}</td>
-                        <td>${data['Forma de Pagamento'] || ''}</td>
-                        <td>${timestamp}</td>
-                    `;
-                    dataBody.appendChild(row);
-                });
-            } catch (error) {
-                console.error("Erro ao carregar dados do Firestore: ", error);
-            }
-        }
     </script>
 </body>
 </html>
