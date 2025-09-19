@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Clientes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos do dashboard para login e visualização dos dados */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+        .login-container, .dashboard-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+        .dashboard-container {
+            display: none;
+            max-width: 1200px;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: .5rem; font-weight: 500; color: #555; }
+        input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        button:hover { background-color: #0056b3; }
+        #logoutBtn { background-color: #dc3545; margin-top: 20px; }
+        #logoutBtn:hover { background-color: #c82333; }
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            margin-top: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .table-container {
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container" id="loginContainer">
+        <h1>Login do Dashboard</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">Entrar</button>
+            <div id="loginError" class="error-message"></div>
+        </form>
+    </div>
+
+    <div class="dashboard-container" id="dashboardContainer">
+        <h1>Dashboard de Clientes</h1>
+        <div class="table-container">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th>Nome completo</th>
+                        <th>Tipo de Cadastro</th>
+                        <th>CPF</th>
+                        <th>CNPJ</th>
+                        <th>Data de Nascimento</th>
+                        <th>Celular</th>
+                        <th>Email</th>
+                        <th>Trabalho</th>
+                        <th>Rua e nº</th>
+                        <th>Bairro</th>
+                        <th>CEP</th>
+                        <th>Plano</th>
+                        <th>Modelo</th>
+                        <th>Forma de Pagamento</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody id="data-body">
+                    <!-- Dados serão inseridos aqui pelo JS -->
+                </tbody>
+            </table>
+        </div>
+        <button id="logoutBtn">Sair</button>
+    </div>
+
+    <!-- CDNs para Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBo_NytB-SfNRGCahNUK9lH33X4stGkDnY",
+            authDomain: "formulario-de-cadastro-62f0d.firebaseapp.com",
+            projectId: "formulario-de-cadastro-62f0d",
+            storageBucket: "formulario-de-cadastro-62f0d.firebasestorage.app",
+            messagingSenderId: "42664296528",
+            appId: "1:42664296528:web:2e31c71fcec9ebdb541155"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const loginForm = document.getElementById('loginForm');
+        const loginContainer = document.getElementById('loginContainer');
+        const dashboardContainer = document.getElementById('dashboardContainer');
+        const loginError = document.getElementById('loginError');
+        const dataBody = document.getElementById('data-body');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Monitora o estado de autenticação para exibir a página correta
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                loginContainer.style.display = 'none';
+                dashboardContainer.style.display = 'block';
+                loadData();
+            } else {
+                loginContainer.style.display = 'block';
+                dashboardContainer.style.display = 'none';
+            }
+        });
+
+        // Lógica de login
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                loginError.textContent = '';
+            } catch (error) {
+                loginError.textContent = 'Erro de login: ' + error.message;
+            }
+        });
+
+        // Lógica de logout
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut();
+        });
+
+        // Carregar dados do Firestore
+        async function loadData() {
+            try {
+                const snapshot = await db.collection('cadastros').orderBy('Timestamp', 'desc').get();
+                dataBody.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const row = document.createElement('tr');
+                    const timestamp = data.Timestamp ? new Date(data.Timestamp.seconds * 1000).toLocaleString('pt-BR') : '';
+
+                    row.innerHTML = `
+                        <td>${data['Nome completo'] || ''}</td>
+                        <td>${data['Tipo de Cadastro'] || ''}</td>
+                        <td>${data['CPF'] || ''}</td>
+                        <td>${data['CNPJ'] || ''}</td>
+                        <td>${data['Data de Nascimento'] || ''}</td>
+                        <td>${data['Celular'] || ''}</td>
+                        <td>${data['Email'] || ''}</td>
+                        <td>${data['Com o que você trabalha'] || ''}</td>
+                        <td>${data['Nome da rua e nº'] || ''}</td>
+                        <td>${data['Bairro'] || ''}</td>
+                        <td>${data['CEP'] || ''}</td>
+                        <td>${data['Plano'] || ''}</td>
+                        <td>${data['Modelo'] || ''}</td>
+                        <td>${data['Forma de Pagamento'] || ''}</td>
+                        <td>${timestamp}</td>
+                    `;
+                    dataBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error("Erro ao carregar dados do Firestore: ", error);
+            }
+        }
+    </script>
+</body>
+</html>
