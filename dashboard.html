@@ -1,1459 +1,496 @@
-Dashboard de Clientes:
-
-
-
 <!DOCTYPE html>
-
 <html lang="pt-BR">
-
 <head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Dashboard de Clientes</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <style>
-
-        body {
-
-            font-family: 'Roboto', sans-serif;
-
-            background-color: #f8f9fa;
-
-            color: #333;
-
-            line-height: 1.6;
-
-            margin: 0;
-
-            padding: 20px;
-
-            display: flex;
-
-            justify-content: center;
-
-            align-items: flex-start; /* Altera para alinhar ao topo em telas grandes */
-
-            min-height: 100vh;
-
-            box-sizing: border-box;
-
-        }
-
-
-
-        .login-container, .dashboard-container {
-
-            width: 100%;
-
-            /* Aumentando a largura máxima para exibir mais dados */
-
-            max-width: 1400px;
-
-            background-color: #fff;
-
-            padding: 30px;
-
-            border-radius: 8px;
-
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-
-            box-sizing: border-box;
-
-            margin-top: 20px;
-
-        }
-
-
-
-        .dashboard-container {
-
-            display: none;
-
-            /* Usar margem automática para centralizar */
-
-            margin-left: auto;
-
-            margin-right: auto;
-
-        }
-
-
-
-        h1 {
-
-            text-align: center;
-
-            color: #007bff;
-
-            margin-bottom: 25px;
-
-            font-weight: 700;
-
-        }
-
-
-
-        .form-group { margin-bottom: 1rem; }
-
-        label { display: block; margin-bottom: .5rem; font-weight: 500; color: #555; }
-
-        input[type="email"], input[type="password"] {
-
-            width: 100%;
-
-            padding: 10px 12px;
-
-            border: 1px solid #ccc;
-
-            border-radius: 4px;
-
-            font-size: 16px;
-
-            box-sizing: border-box;
-
-        }
-
-        
-
-        button {
-
-            padding: 12px 20px;
-
-            background-color: #007bff;
-
-            color: #fff;
-
-            border: none;
-
-            border-radius: 4px;
-
-            font-size: 16px;
-
-            font-weight: 500;
-
-            cursor: pointer;
-
-            transition: background-color 0.3s;
-
-        }
-
-        
-
-        .login-container button { width: 100%; margin-top: 10px; }
-
-        .dashboard-controls { display: flex; justify-content: flex-end; margin-bottom: 15px; }
-
-
-
-        #logoutBtn { 
-
-            background-color: #dc3545; 
-
-            margin-left: 15px;
-
-            width: auto;
-
-        }
-
-        #logoutBtn:hover { background-color: #c82333; }
-
-        
-
-        .error-message {
-
-            color: #dc3545;
-
-            text-align: center;
-
-            margin-top: 10px;
-
-        }
-
-
-
-        .table-container {
-
-            overflow-x: auto;
-
-            border: 1px solid #eee;
-
-            border-radius: 4px;
-
-        }
-
-        
-
-        table {
-
-            width: 100%;
-
-            border-collapse: collapse;
-
-            font-size: 14px;
-
-            white-space: nowrap; /* Impede que o texto quebre dentro das células */
-
-        }
-
-        th, td {
-
-            border: 1px solid #ddd;
-
-            padding: 10px; /* Aumenta o padding */
-
-            text-align: left;
-
-            min-width: 120px; /* Garante uma largura mínima para as colunas */
-
-        }
-
-        th {
-
-            background-color: #007bff;
-
-            color: white;
-
-            position: sticky;
-
-            top: 0;
-
-        }
-
-        tr:nth-child(even) { background-color: #f2f2f2; }
-
-        
-
-        /* Estilos para a funcionalidade de edição */
-
-        .editable-cell input {
-
-            width: 100%;
-
-            box-sizing: border-box;
-
-            border: none;
-
-            padding: 0;
-
-            margin: 0;
-
-            background-color: transparent;
-
-        }
-
-        .editable-cell {
-
-            padding: 0 !important; /* Remove padding na célula para o input ocupar o espaço */
-
-        }
-
-        .action-cell {
-
-            min-width: 80px;
-
-            text-align: center;
-
-        }
-
-        .action-cell button {
-
-            padding: 5px 10px;
-
-            font-size: 12px;
-
-            margin-right: 5px;
-
-        }
-
-        .save-btn { background-color: #28a745; }
-
-        .save-btn:hover { background-color: #218838; }
-
-
-
-        /* Responsividade para telas menores */
-
-        @media (max-width: 768px) {
-
-            .dashboard-container {
-
-                padding: 15px;
-
-            }
-
-            .dashboard-controls {
-
-                justify-content: space-between;
-
-                flex-wrap: wrap;
-
-            }
-
-            .dashboard-controls button {
-
-                width: 48%;
-
-                margin: 5px 0;
-
-            }
-
-        }
-
-    </style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Clientes</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .login-container, .dashboard-container {
+            width: 100%;
+            max-width: 1400px;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            margin-top: 20px;
+        }
+
+        .dashboard-container {
+            display: none;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: .5rem; font-weight: 500; color: #555; }
+        input[type="email"], input[type="password"], input[type="search"] { /* Adicionado input de busca */
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .login-container button { width: 100%; margin-top: 10px; }
+        
+        /* Controles do Dashboard agora incluem a busca */
+        .dashboard-controls { 
+            display: flex; 
+            justify-content: space-between; /* Alinhamento alterado */
+            align-items: center; /* Alinha verticalmente */
+            margin-bottom: 20px; 
+            gap: 20px; /* Espaçamento entre os itens */
+        }
+
+        #searchContainer {
+            flex-grow: 1; /* Faz a busca ocupar o espaço disponível */
+        }
+        
+        #logoutBtn { 
+            background-color: #dc3545; 
+            width: auto;
+            flex-shrink: 0; /* Impede que o botão encolha */
+        }
+        #logoutBtn:hover { background-color: #c82333; }
+        
+        .error-message {
+            color: #dc3545;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+            min-width: 120px;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        
+        .editable-cell input {
+            width: 100%;
+            box-sizing: border-box;
+            border: 1px solid #007bff; /* Borda para destacar */
+            padding: 8px; /* Padding interno */
+            margin: 0;
+            background-color: #f0f8ff; /* Fundo levemente azulado */
+        }
+        .editable-cell {
+            padding: 2px !important;
+        }
+        .action-cell {
+            min-width: 150px; /* Aumenta a largura para caber os botões */
+            text-align: center;
+            white-space: nowrap;
+        }
+        .action-cell button {
+            padding: 5px 10px;
+            font-size: 12px;
+            margin: 0 2px;
+        }
+        .save-btn { background-color: #28a745; }
+        .save-btn:hover { background-color: #218838; }
+        .cancel-btn { background-color: #6c757d; }
+        .cancel-btn:hover { background-color: #5a6268; }
+
+        /* NOVO: Estilo para o botão de excluir */
+        .delete-btn { background-color: #dc3545; }
+        .delete-btn:hover { background-color: #c82333; }
+
+        @media (max-width: 768px) {
+            .dashboard-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
 </head>
-
 <body>
-
-    <div class="login-container" id="loginContainer">
-
-        <h1>Login do Dashboard</h1>
-
-        <form id="loginForm">
-
-            <div class="form-group">
-
-                <label for="email">Email</label>
-
-                <input type="email" id="email" required>
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="password">Senha</label>
-
-                <input type="password" id="password" required>
-
-            </div>
-
-            <button type="submit">Entrar</button>
-
-            <div id="loginError" class="error-message"></div>
-
-        </form>
-
-    </div>
-
-
-
-    <div class="dashboard-container" id="dashboardContainer">
-
-        <h1>Dashboard de Clientes</h1>
-
-        <div class="dashboard-controls">
-
-            <button id="logoutBtn">Sair</button>
-
-        </div>
-
-        
-
-        <div class="table-container">
-
-            <table id="data-table">
-
-                <thead>
-
-                    <tr>
-
-                        <th>Nome completo</th>
-
-                        <th>Tipo de Cadastro</th>
-
-                        <th>CPF</th>
-
-                        <th>CNPJ</th>
-
-                        <th>Data de Nascimento</th>
-
-                        <th>Celular</th>
-
-                        <th>Email</th>
-
-                        <th>Com o que você trabalha</th>
-
-                        <th>Nome da rua e nº</th>
-
-                        <th>Bairro</th>
-
-                        <th>CEP</th>
-
-                        <th>Plano</th>
-
-                        <th>Modelo</th>
-
-                        <th>Forma de Pagamento</th>
-
-                        <th>Timestamp</th>
-
-                        <th>Ações</th> 
-
-                    </tr>
-
-                </thead>
-
-                <tbody id="data-body">
-
-                    </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
-
-
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
-    <script>
-
-        // Configuração do Firebase
-
-        const firebaseConfig = {
-
-            apiKey: "AIzaSyBo_NytB-SfNRGCahNUK9lH33X4stGkDnY",
-
-            authDomain: "formulario-de-cadastro-62f0d.firebaseapp.com",
-
-            projectId: "formulario-de-cadastro-62f0d",
-
-            storageBucket: "formulario-de-cadastro-62f0d.firebasestorage.app",
-
-            messagingSenderId: "42664296528",
-
-            appId: "1:42664296528:web:2e31c71fcec9ebdb541155"
-
-        };
-
-        firebase.initializeApp(firebaseConfig);
-
-        const auth = firebase.auth();
-
-        const db = firebase.firestore();
-
-
-
-        const loginForm = document.getElementById('loginForm');
-
-        const loginContainer = document.getElementById('loginContainer');
-
-        const dashboardContainer = document.getElementById('dashboardContainer');
-
-        const loginError = document.getElementById('loginError');
-
-        const dataBody = document.getElementById('data-body');
-
-        const logoutBtn = document.getElementById('logoutBtn');
-
-        
-
-        // Mapeamento dos campos da tabela para as chaves do Firestore
-
-        const FIELD_NAMES = [
-
-            'Nome completo', 'Tipo de Cadastro', 'CPF', 'CNPJ', 'Data de Nascimento', 'Celular', 'Email', 
-
-            'Com o que você trabalha', 'Nome da rua e nº', 'Bairro', 'CEP', 'Plano', 'Modelo', 'Forma de Pagamento'
-
-        ];
-
-        
-
-        let currentlyEditingRowId = null; // Rastreia a linha atualmente em modo de edição
-
-        
-
-        // --- FUNÇÕES DE EDIÇÃO ---
-
-
-
-        function enableEdit(rowId) {
-
-            // Se já houver uma linha em edição, salva ou cancela a edição anterior
-
-            if (currentlyEditingRowId && currentlyEditingRowId !== rowId) {
-
-                // Aqui você pode adicionar um aviso ou forçar o salvamento, mas para eficiência, vamos ignorar a anterior.
-
-            }
-
-            currentlyEditingRowId = rowId;
-
-            
-
-            const row = document.getElementById(`row-${rowId}`);
-
-            if (!row) return;
-
-
-
-            // 1. Torna as células editáveis
-
-            row.querySelectorAll('.data-cell').forEach((cell, index) => {
-
-                const fieldName = FIELD_NAMES[index];
-
-                const currentValue = cell.textContent.trim();
-
-
-
-                // Para campos longos (Nome completo, Email, Rua), use input type=text.
-
-                // Outros campos importantes (CPF, Celular, etc.) também são tratados como texto.
-
-                let input = document.createElement('input');
-
-                input.type = 'text';
-
-                input.value = currentValue;
-
-                input.setAttribute('data-field', fieldName);
-
-                input.setAttribute('data-id', rowId);
-
-                
-
-                cell.innerHTML = '';
-
-                cell.classList.add('editable-cell');
-
-                cell.appendChild(input);
-
-            });
-
-            
-
-            // 2. Muda o botão 'Editar' para 'Salvar'
-
-            const actionCell = row.querySelector('.action-cell');
-
-            actionCell.innerHTML = `
-
-                <button class="save-btn" data-id="${rowId}">Salvar</button>
-
-                <button class="cancel-btn" data-id="${rowId}">Cancelar</button>
-
-            `;
-
-            
-
-            // Adiciona listeners para os novos botões
-
-            actionCell.querySelector('.save-btn').addEventListener('click', () => saveEdit(rowId));
-
-            actionCell.querySelector('.cancel-btn').addEventListener('click', () => cancelEdit(rowId));
-
-        }
-
-
-
-        async function saveEdit(rowId) {
-
-            const row = document.getElementById(`row-${rowId}`);
-
-            const dataToUpdate = {};
-
-            
-
-            // 1. Coleta os novos dados
-
-            let allValid = true;
-
-            row.querySelectorAll('input[data-field]').forEach(input => {
-
-                const fieldName = input.getAttribute('data-field');
-
-                dataToUpdate[fieldName] = input.value;
-
-            });
-
-
-
-            if (!allValid) {
-
-                alert('Por favor, preencha todos os campos obrigatórios.');
-
-                return;
-
-            }
-
-            
-
-            // 2. Salva no Firebase
-
-            try {
-
-                await db.collection('cadastros').doc(rowId).update(dataToUpdate);
-
-                alert('✅ Alteração salva com sucesso!');
-
-                
-
-                // 3. Recarrega os dados (ou reverte para o modo visual com os novos dados)
-
-                currentlyEditingRowId = null;
-
-                loadData(); // Mais simples e seguro recarregar a tabela
-
-                
-
-            } catch (error) {
-
-                console.error("Erro ao salvar no Firestore: ", error);
-
-                alert(`❌ Erro ao salvar: ${error.message}`);
-
-            }
-
-        }
-
-        
-
-        function cancelEdit(rowId) {
-
-            currentlyEditingRowId = null;
-
-            loadData(); // Recarrega os dados originais
-
-        }
-
-
-
-        // --- FUNÇÕES DE AUTENTICAÇÃO E CARREGAMENTO ---
-
-
-
-        // Carregar dados do Firestore
-
-        async function loadData() {
-
-            // Limpa a tabela antes de carregar
-
-            dataBody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Carregando dados...</td></tr>';
-
-
-
-            try {
-
-                // Obtém os dados e ordena por Timestamp
-
-                const snapshot = await db.collection('cadastros').orderBy('Timestamp', 'desc').get();
-
-                dataBody.innerHTML = '';
-
-                
-
-                if (snapshot.empty) {
-
-                     dataBody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Nenhum cadastro encontrado.</td></tr>';
-
-                     return;
-
-                }
-
-
-
-                snapshot.forEach(doc => {
-
-                    const data = doc.data();
-
-                    const rowId = doc.id;
-
-                    const row = document.createElement('tr');
-
-                    row.id = `row-${rowId}`;
-
-                    
-
-                    const timestamp = data.Timestamp ? new Date(data.Timestamp.seconds * 1000).toLocaleString('pt-BR') : 'N/A';
-
-                    
-
-                    let rowHtml = '';
-
-
-
-                    // Adiciona as células de dados
-
-                    FIELD_NAMES.forEach(fieldName => {
-
-                        const cellContent = data[fieldName] || '';
-
-                        // Adiciona a classe data-cell para identificação na edição
-
-                        rowHtml += `<td class="data-cell">${cellContent}</td>`;
-
-                    });
-
-
-
-                    // Adiciona a célula de Timestamp
-
-                    rowHtml += `<td class="data-cell">${timestamp}</td>`;
-
-                    
-
-                    // Adiciona a célula de Ações
-
-                    rowHtml += `
-
-                        <td class="action-cell">
-
-                            <button class="edit-btn" data-id="${rowId}">Editar</button>
-
-                        </td>
-
-                    `;
-
-
-
-                    row.innerHTML = rowHtml;
-
-                    dataBody.appendChild(row);
-
-
-
-                    // Adiciona listener para o botão de edição
-
-                    row.querySelector('.edit-btn').addEventListener('click', (e) => {
-
-                        enableEdit(e.target.dataset.id);
-
-                    });
-
-                });
-
-            } catch (error) {
-
-                console.error("Erro ao carregar dados do Firestore: ", error);
-
-                dataBody.innerHTML = `<tr><td colspan="16" style="color: #dc3545; text-align:center;">Erro ao carregar dados: ${error.message}</td></tr>`;
-
-            }
-
-        }
-
-
-
-        // Monitora o estado de autenticação
-
-        auth.onAuthStateChanged((user) => {
-
-            if (user) {
-
-                loginContainer.style.display = 'none';
-
-                dashboardContainer.style.display = 'block';
-
-                loadData();
-
-            } else {
-
-                loginContainer.style.display = 'block';
-
-                dashboardContainer.style.display = 'none';
-
-            }
-
-        });
-
-
-
-        // Lógica de login
-
-        loginForm.addEventListener('submit', async (e) => {
-
-            e.preventDefault();
-
-            const email = document.getElementById('email').value;
-
-            const password = document.getElementById('password').value;
-
-            try {
-
-                await auth.signInWithEmailAndPassword(email, password);
-
-                loginError.textContent = '';
-
-            } catch (error) {
-
-                loginError.textContent = 'Erro de login: ' + error.message;
-
-            }
-
-        });
-
-
-
-        // Lógica de logout
-
-        logoutBtn.addEventListener('click', () => {
-
-            auth.signOut();
-
-        });
-
-    </script>
-
+    <div class="login-container" id="loginContainer">
+        <h1>Login do Dashboard</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Senha</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit">Entrar</button>
+            <div id="loginError" class="error-message"></div>
+        </form>
+    </div>
+
+    <div class="dashboard-container" id="dashboardContainer">
+        <h1>Dashboard de Clientes</h1>
+        <div class="dashboard-controls">
+            <div id="searchContainer">
+                <input type="search" id="searchInput" placeholder="🔎 Buscar por nome ou email...">
+            </div>
+            <button id="logoutBtn">Sair</button>
+        </div>
+        
+        <div class="table-container">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th>Nome completo</th>
+                        <th>Tipo de Cadastro</th>
+                        <th>CPF</th>
+                        <th>CNPJ</th>
+                        <th>Data de Nascimento</th>
+                        <th>Celular</th>
+                        <th>Email</th>
+                        <th>Com o que você trabalha</th>
+                        <th>Nome da rua e nº</th>
+                        <th>Bairro</th>
+                        <th>CEP</th>
+                        <th>Plano</th>
+                        <th>Modelo</th>
+                        <th>Forma de Pagamento</th>
+                        <th>Timestamp</th>
+                        <th>Ações</th> 
+                    </tr>
+                </thead>
+                <tbody id="data-body">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script>
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBo_NytB-SfNRGCahNUK9lH33X4stGkDnY",
+            authDomain: "formulario-de-cadastro-62f0d.firebaseapp.com",
+            projectId: "formulario-de-cadastro-62f0d",
+            storageBucket: "formulario-de-cadastro-62f0d.appspot.com",
+            messagingSenderId: "42664296528",
+            appId: "1:42664296528:web:2e31c71fcec9ebdb541155"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        const loginForm = document.getElementById('loginForm');
+        const loginContainer = document.getElementById('loginContainer');
+        const dashboardContainer = document.getElementById('dashboardContainer');
+        const loginError = document.getElementById('loginError');
+        const dataBody = document.getElementById('data-body');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const searchInput = document.getElementById('searchInput'); // NOVO: Elemento da busca
+
+        const FIELD_NAMES = [
+            'Nome completo', 'Tipo de Cadastro', 'CPF', 'CNPJ', 'Data de Nascimento', 'Celular', 'Email', 
+            'Com o que você trabalha', 'Nome da rua e nº', 'Bairro', 'CEP', 'Plano', 'Modelo', 'Forma de Pagamento'
+        ];
+        
+        let currentlyEditingRowId = null;
+        let allCustomersData = []; // NOVO: Armazena todos os dados para a busca
+
+        // --- FUNÇÕES DE EDIÇÃO E EXCLUSÃO ---
+
+        function enableEdit(rowId) {
+            if (currentlyEditingRowId && currentlyEditingRowId !== rowId) {
+                cancelEdit(currentlyEditingRowId); // Cancela edição anterior para evitar conflitos
+            }
+            currentlyEditingRowId = rowId;
+            
+            const row = document.getElementById(`row-${rowId}`);
+            if (!row) return;
+
+            row.querySelectorAll('.data-cell').forEach((cell, index) => {
+                if(index >= FIELD_NAMES.length) return; // Ignora a célula de timestamp
+                const fieldName = FIELD_NAMES[index];
+                const currentValue = cell.textContent.trim();
+                
+                let input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentValue;
+                input.setAttribute('data-field', fieldName);
+                
+                cell.innerHTML = '';
+                cell.classList.add('editable-cell');
+                cell.appendChild(input);
+            });
+            
+            const actionCell = row.querySelector('.action-cell');
+            actionCell.innerHTML = `
+                <button class="save-btn" data-id="${rowId}">Salvar</button>
+                <button class="cancel-btn" data-id="${rowId}">Cancelar</button>
+            `;
+            
+            actionCell.querySelector('.save-btn').addEventListener('click', () => saveEdit(rowId));
+            actionCell.querySelector('.cancel-btn').addEventListener('click', () => cancelEdit(rowId));
+        }
+
+        async function saveEdit(rowId) {
+            const row = document.getElementById(`row-${rowId}`);
+            const dataToUpdate = {};
+            
+            row.querySelectorAll('input[data-field]').forEach(input => {
+                const fieldName = input.getAttribute('data-field');
+                dataToUpdate[fieldName] = input.value;
+            });
+
+            try {
+                // Adiciona um feedback visual de "salvando"
+                const saveBtn = row.querySelector('.save-btn');
+                saveBtn.textContent = 'Salvando...';
+                saveBtn.disabled = true;
+
+                await db.collection('cadastros').doc(rowId).update(dataToUpdate);
+                
+                // NOVO: Feedback mais sutil
+                showToast('✅ Alteração salva com sucesso!');
+                
+                currentlyEditingRowId = null;
+                await loadData(); // Recarrega todos os dados para manter consistência
+                
+            } catch (error) {
+                console.error("Erro ao salvar no Firestore: ", error);
+                showToast(`❌ Erro ao salvar: ${error.message}`, true);
+                
+                // Reabilita o botão em caso de erro
+                const saveBtn = row.querySelector('.save-btn');
+                saveBtn.textContent = 'Salvar';
+                saveBtn.disabled = false;
+            }
+        }
+        
+        function cancelEdit(rowId) {
+            currentlyEditingRowId = null;
+            // Apenas re-renderiza os dados já carregados, sem ir ao banco
+            renderTable(allCustomersData); 
+        }
+
+        // NOVO: Função para excluir um cliente
+        async function deleteCustomer(rowId) {
+            // Passo 1: Confirmação
+            if (!confirm('Tem certeza que deseja excluir este cadastro? Esta ação não pode ser desfeita.')) {
+                return;
+            }
+
+            try {
+                // Passo 2: Deleta do Firebase
+                await db.collection('cadastros').doc(rowId).delete();
+                showToast('🗑️ Cadastro excluído com sucesso!');
+
+                // Passo 3: Remove da tela sem recarregar tudo
+                const row = document.getElementById(`row-${rowId}`);
+                if (row) {
+                    row.remove();
+                }
+                // Atualiza também o array local de dados
+                allCustomersData = allCustomersData.filter(customer => customer.id !== rowId);
+
+            } catch (error) {
+                console.error("Erro ao excluir o documento: ", error);
+                showToast(`❌ Erro ao excluir: ${error.message}`, true);
+            }
+        }
+
+
+        // --- FUNÇÕES DE CARREGAMENTO E RENDERIZAÇÃO ---
+
+        async function loadData() {
+            dataBody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Carregando dados...</td></tr>';
+
+            try {
+                const snapshot = await db.collection('cadastros').orderBy('Timestamp', 'desc').get();
+                
+                // NOVO: Mapeia e armazena os dados no array local
+                allCustomersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+                renderTable(allCustomersData); // Renderiza a tabela com os dados
+                
+            } catch (error) {
+                console.error("Erro ao carregar dados do Firestore: ", error);
+                dataBody.innerHTML = `<tr><td colspan="16" style="color: #dc3545; text-align:center;">Erro ao carregar dados: ${error.message}</td></tr>`;
+            }
+        }
+
+        // NOVO: Função separada para renderizar a tabela
+        function renderTable(dataArray) {
+            dataBody.innerHTML = '';
+
+            if (!dataArray || dataArray.length === 0) {
+                dataBody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Nenhum cadastro encontrado.</td></tr>';
+                return;
+            }
+
+            dataArray.forEach(customerData => {
+                const data = customerData;
+                const rowId = customerData.id;
+                const row = document.createElement('tr');
+                row.id = `row-${rowId}`;
+                
+                const timestamp = data.Timestamp ? new Date(data.Timestamp.seconds * 1000).toLocaleString('pt-BR') : 'N/A';
+                
+                let rowHtml = '';
+
+                FIELD_NAMES.forEach(fieldName => {
+                    const cellContent = data[fieldName] || '';
+                    rowHtml += `<td class="data-cell">${cellContent}</td>`;
+                });
+
+                rowHtml += `<td class="timestamp-cell">${timestamp}</td>`;
+                
+                // NOVO: Adiciona o botão de excluir
+                rowHtml += `
+                    <td class="action-cell">
+                        <button class="edit-btn" data-id="${rowId}">Editar</button>
+                        <button class="delete-btn" data-id="${rowId}">Excluir</button>
+                    </td>
+                `;
+
+                row.innerHTML = rowHtml;
+                dataBody.appendChild(row);
+
+                row.querySelector('.edit-btn').addEventListener('click', (e) => {
+                    enableEdit(e.target.dataset.id);
+                });
+
+                // NOVO: Adiciona listener para o botão de excluir
+                row.querySelector('.delete-btn').addEventListener('click', (e) => {
+                    deleteCustomer(e.target.dataset.id);
+                });
+            });
+        }
+
+
+        // --- LÓGICA DE BUSCA E FEEDBACK ---
+
+        // NOVO: Função para filtrar os dados da tabela
+        function filterData() {
+            const query = searchInput.value.toLowerCase();
+            
+            const filteredData = allCustomersData.filter(customer => {
+                const name = (customer['Nome completo'] || '').toLowerCase();
+                const email = (customer['Email'] || '').toLowerCase();
+                return name.includes(query) || email.includes(query);
+            });
+            
+            renderTable(filteredData);
+        }
+
+        // NOVO: Função para exibir notificações (Toast)
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.padding = '12px 25px';
+            toast.style.borderRadius = '6px';
+            toast.style.color = 'white';
+            toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+            toast.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+            toast.style.zIndex = '1000';
+            toast.style.transition = 'opacity 0.5s';
+            
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
+
+        // --- EVENT LISTENERS ---
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                loginContainer.style.display = 'none';
+                dashboardContainer.style.display = 'block';
+                loadData();
+            } else {
+                loginContainer.style.display = 'block';
+                dashboardContainer.style.display = 'none';
+            }
+        });
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                loginError.textContent = '';
+            } catch (error) {
+                loginError.textContent = 'Erro de login: ' + error.message;
+            }
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            auth.signOut();
+        });
+        
+        // NOVO: Adiciona listener para a busca
+        searchInput.addEventListener('input', filterData);
+
+    </script>
 </body>
-
 </html>
-
-
-
-Formulário de Cadastro:
-
-
-
-<!DOCTYPE html>
-
-<html lang="pt-BR">
-
-<head>
-
-    <meta charset="UTF-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Formulário de Cadastro de Clientes</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-
-    <style>
-
-        /* Estilos do formulário (sem alterações) */
-
-        :root {
-
-            --primary-color: #007bff;
-
-            --secondary-color: #6c757d;
-
-            --success-color: #28a745;
-
-            --error-color: #dc3545;
-
-            --border-color: #ccc;
-
-            --background-color: #f8f9fa;
-
-            --form-bg-color: #fff;
-
-            --shadow-color: rgba(0, 0, 0, 0.1);
-
-        }
-
-        body {
-
-            font-family: 'Roboto', sans-serif;
-
-            background-color: var(--background-color);
-
-            color: #333;
-
-            line-height: 1.6;
-
-            margin: 0;
-
-            padding: 20px;
-
-            display: flex;
-
-            justify-content: center;
-
-            align-items: flex-start;
-
-            min-height: 100vh;
-
-            box-sizing: border-box;
-
-        }
-
-        .container {
-
-            width: 100%;
-
-            max-width: 600px;
-
-            background-color: var(--form-bg-color);
-
-            padding: 30px;
-
-            border-radius: 8px;
-
-            box-shadow: 0 4px 10px var(--shadow-color);
-
-            box-sizing: border-box;
-
-        }
-
-        h1 {
-
-            text-align: center;
-
-            color: var(--primary-color);
-
-            margin-bottom: 25px;
-
-            font-weight: 700;
-
-        }
-
-        .form-group {
-
-            margin-bottom: 1rem;
-
-        }
-
-        label {
-
-            display: block;
-
-            margin-bottom: .5rem;
-
-            font-weight: 500;
-
-            color: #555;
-
-        }
-
-        input, select {
-
-            width: 100%;
-
-            padding: 10px 12px;
-
-            border: 1px solid var(--border-color);
-
-            border-radius: 4px;
-
-            font-size: 16px;
-
-            box-sizing: border-box;
-
-            transition: border-color 0.3s, box-shadow 0.3s;
-
-        }
-
-        input:focus, select:focus {
-
-            outline: none;
-
-            border-color: var(--primary-color);
-
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-
-        }
-
-        input[readonly] {
-
-            background-color: #e9ecef;
-
-            cursor: not-allowed;
-
-        }
-
-        .feedback {
-
-            display: none;
-
-            padding: 15px;
-
-            margin-top: 20px;
-
-            border-radius: 4px;
-
-            font-weight: 500;
-
-            text-align: center;
-
-            transition: opacity 0.3s;
-
-        }
-
-        .feedback.success {
-
-            background-color: #d4edda;
-
-            color: var(--success-color);
-
-            border: 1px solid #c3e6cb;
-
-        }
-
-        .feedback.error {
-
-            background-color: #f8d7da;
-
-            color: var(--error-color);
-
-            border: 1px solid #f5c6cb;
-
-        }
-
-        button {
-
-            width: 100%;
-
-            padding: 12px;
-
-            background-color: var(--primary-color);
-
-            color: #fff;
-
-            border: none;
-
-            border-radius: 4px;
-
-            font-size: 18px;
-
-            font-weight: 500;
-
-            cursor: pointer;
-
-            transition: background-color 0.3s, opacity 0.3s;
-
-        }
-
-        button:hover {
-
-            background-color: #0056b3;
-
-        }
-
-        button:disabled {
-
-            opacity: 0.6;
-
-            cursor: not-allowed;
-
-        }
-
-        .loading {
-
-            display: none;
-
-            text-align: center;
-
-            margin-top: 15px;
-
-        }
-
-        .loading::after {
-
-            content: '';
-
-            display: block;
-
-            width: 20px;
-
-            height: 20px;
-
-            border: 3px solid #f3f3f3;
-
-            border-radius: 50%;
-
-            border-top: 3px solid var(--primary-color);
-
-            animation: spin 1s linear infinite;
-
-            margin: 0 auto;
-
-        }
-
-        @keyframes spin {
-
-            0% { transform: rotate(0deg); }
-
-            100% { transform: rotate(360deg); }
-
-        }
-
-        @media (max-width: 768px) {
-
-            .container {
-
-                padding: 20px;
-
-            }
-
-        }
-
-    </style>
-
-</head>
-
-<body>
-
-    <div class="container">
-
-        <h1>Cadastro de Clientes</h1>
-
-        <form id="cadastroForm">
-
-            <div class="form-group">
-
-                <label for="nomeCompleto">Nome completo*</label>
-
-                <input type="text" id="nomeCompleto" name="Nome completo" required>
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="tipoCadastro">Tipo de Cadastro*</label>
-
-                <select id="tipoCadastro" name="Tipo de Cadastro" required>
-
-                    <option value="CPF">CPF</option>
-
-                    <option value="CNPJ">CNPJ</option>
-
-                </select>
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="cpf">CPF*</label>
-
-                <input type="text" id="cpf" name="CPF" required>
-
-            </div>
-
-            <div class="form-group" id="cnpjGroup">
-
-                <label for="cnpj">CNPJ*</label>
-
-                <input type="text" id="cnpj" name="CNPJ">
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="dataNasc">Data de Nascimento</label>
-
-                <input type="text" id="dataNasc" name="Data de Nascimento" placeholder="DD/MM/AAAA">
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="celular">Celular</label>
-
-                <input type="text" id="celular" name="Celular" placeholder="(99) 99999-9999">
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="email">Email*</label>
-
-                <input type="email" id="email" name="Email" required>
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="trabalho">Com o que você trabalha*</label>
-
-                <input type="text" id="trabalho" name="Com o que você trabalha" required>
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="endereco">Nome da rua e nº*</label>
-
-                <input type="text" id="endereco" name="Nome da rua e nº" required>
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="bairro">Bairro*</label>
-
-                <input type="text" id="bairro" name="Bairro" required>
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="cep">CEP</label>
-
-                <input type="text" id="cep" name="CEP" placeholder="99999-999">
-
-            </div>
-
-            
-
-            <div class="form-group">
-
-                <label for="plano">Plano*</label>
-
-                <select id="plano" name="Plano" required>
-
-                    <option value="PagLucro">PagLucro (Recebimento: 1 dia útil)</option>
-
-                    <option value="Pag Pro">Pag Pro (Recebimento: Na hora)</option>
-
-                </select>
-
-            </div>
-
-
-
-            <div class="form-group">
-
-                <label for="modelo">Modelo</label>
-
-                <select id="modelo" name="Modelo">
-
-                    <option value="PagMinizinha">PagMinizinha</option>
-
-                    <option value="PagMini">PagMini</option>
-
-                    <option value="PagPlus">PagPlus</option>
-
-                    <option value="PagPro">PagPro</option>
-
-                    <option value="PagSmart">PagSmart</option>
-
-                </select>
-
-            </div>
-
-            <div class="form-group">
-
-                <label for="formaPagamento">Forma de Pagamento</label>
-
-                <select id="formaPagamento" name="Forma de Pagamento">
-
-                    <option value="Pix">Pix</option>
-
-                    <option value="Cartão">Cartão</option>
-
-                    <option value="Boleto">Boleto</option>
-
-                </select>
-
-            </div>
-
-            <button type="submit" id="submitBtn">Enviar</button>
-
-            <div id="loading" class="loading"></div>
-
-            <div id="feedback" class="feedback"></div>
-
-        </form>
-
-    </div>
-
-
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.8/jquery.inputmask.min.js"></script>
-
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
-    <script>
-
-        // Configuração do Firebase
-
-        const firebaseConfig = {
-
-            apiKey: "AIzaSyBo_NytB-SfNRGCahNUK9lH33X4stGkDnY",
-
-            authDomain: "formulario-de-cadastro-62f0d.firebaseapp.com",
-
-            projectId: "formulario-de-cadastro-62f0d",
-
-            storageBucket: "formulario-de-cadastro-62f0d.firebasestorage.app",
-
-            messagingSenderId: "42664296528",
-
-            appId: "1:42664296528:web:2e31c71fcec9ebdb541155"
-
-        };
-
-        firebase.initializeApp(firebaseConfig);
-
-        const db = firebase.firestore();
-
-
-
-        $(function() {
-
-            // Aplicação das máscaras (sem alterações)
-
-            $('#cpf').inputmask('999.999.999-99');
-
-            $('#cnpj').inputmask('99.999.999/9999-99');
-
-            $('#celular').inputmask('(99) 99999-9999');
-
-            $('#cep').inputmask('99999-999');
-
-            $('#dataNasc').inputmask('99/99/9999');
-
-            
-
-            // Lógica para exibir/esconder CNPJ (sem alterações)
-
-            const cnpjGroup = $('#cnpjGroup');
-
-            const cnpjInput = $('#cnpj');
-
-            const tipoCadastroSelect = $('#tipoCadastro');
-
-            tipoCadastroSelect.on('change', function() {
-
-                if (this.value === 'CNPJ') {
-
-                    cnpjGroup.slideDown();
-
-                    cnpjInput.prop('required', true);
-
-                } else {
-
-                    cnpjGroup.slideUp();
-
-                    cnpjInput.prop('required', false);
-
-                }
-
-            }).trigger('change');
-
-
-
-            // Lógica de envio para o Firestore (sem alterações)
-
-            const form = document.getElementById('cadastroForm');
-
-            const submitBtn = document.getElementById('submitBtn');
-
-            const loading = document.getElementById('loading');
-
-            const feedback = document.getElementById('feedback');
-
-            
-
-            form.addEventListener('submit', async (e) => {
-
-                e.preventDefault();
-
-                submitBtn.disabled = true;
-
-                loading.style.display = 'block';
-
-                feedback.style.display = 'none';
-
-
-
-                const formData = new FormData(form);
-
-                const data = {};
-
-                for (let [key, value] of formData.entries()) {
-
-                    data[key] = value;
-
-                }
-
-                data.Timestamp = firebase.firestore.FieldValue.serverTimestamp();
-
-
-
-                try {
-
-                    // Os dados, incluindo o novo campo 'Plano', são enviados para a coleção 'cadastros'
-
-                    await db.collection('cadastros').add(data);
-
-                    feedback.textContent = '✅ Enviado com sucesso!';
-
-                    feedback.className = 'feedback success';
-
-                    form.reset();
-
-                } catch (error) {
-
-                    console.error("Erro ao enviar para o Firestore: ", error);
-
-                    feedback.textContent = '❌ Erro ao enviar. Tente novamente.';
-
-                    feedback.className = 'feedback error';
-
-                } finally {
-
-                    submitBtn.disabled = false;
-
-                    loading.style.display = 'none';
-
-                    feedback.style.display = 'block';
-
-                }
-
-            });
-
-        });
-
-    </script>
-
-</body>
-
-</html>
-
-
-
-Regras Firebase:
-
-
-
-rules_version = '2';
-
-service cloud.firestore {
-
-  match /databases/{database}/documents {
-
-    // Regra específica para a coleção 'cadastros'
-
-    match /cadastros/{documentId} {
-
-      // Permite que qualquer um (usuário deslogado) crie um novo registro (formulário)
-
-      allow create: if true;
-
-      
-
-      // Permite ler, atualizar ou deletar SOMENTE se o usuário estiver autenticado (dashboard)
-
-      allow read, update, delete: if request.auth != null;
-
-    }
-
-  }
-
-}
