@@ -3,15 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Clientes</title>
+    <title>Dashboard de Clientes - PagLucro</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --color-brand-dark: #0B0C22;
+            --color-brand-accent: #ADDC2F;
+            --color-text-primary: #FFFFFF;
+            --color-text-secondary: #d4d4d4;
+            --color-surface-background: #F8F9FA;
+            --color-border: #4A4B5A;
+            --color-input-background: #1A1B3A;
+            --color-success: #28a745;
+            --color-danger: #dc3545;
+            --color-warning: #ffc107;
+            --color-secondary: #6c757d;
+            --shadow-color: rgba(0, 0, 0, 0.25);
+            --table-row-hover: rgba(173, 220, 47, 0.1);
+        }
+
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
+            background-color: var(--color-surface-background);
+            color: var(--color-text-primary);
             line-height: 1.6;
             margin: 0;
             padding: 20px;
@@ -25,140 +41,83 @@
         .login-container, .dashboard-container {
             width: 100%;
             max-width: 1400px;
-            background-color: #fff;
+            background-color: var(--color-brand-dark);
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px var(--shadow-color);
+            border: 1px solid var(--color-border);
             box-sizing: border-box;
             margin-top: 20px;
         }
-
-        .dashboard-container {
-            display: none;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        h1 {
-            text-align: center;
-            color: #007bff;
-            margin-bottom: 25px;
-            font-weight: 700;
-        }
-
+        .dashboard-container { display: none; margin-left: auto; margin-right: auto; }
+        h1 { text-align: center; color: var(--color-brand-accent); margin-bottom: 25px; font-weight: 700; }
         .form-group { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: .5rem; font-weight: 500; color: #555; }
-        input[type="email"], input[type="password"], input[type="search"] { /* Adicionado input de busca */
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
+        label { display: block; margin-bottom: .5rem; font-weight: 500; color: var(--color-text-secondary); }
+        
+        input[type="email"], input[type="password"], input[type="search"] {
+            width: 100%; padding: 10px 12px;
+            background-color: var(--color-input-background); color: var(--color-text-primary);
+            border: 1px solid var(--color-border); border-radius: 4px; font-size: 16px;
             box-sizing: border-box;
         }
+        input[type="search"]::placeholder { color: var(--color-text-secondary); opacity: 0.7; }
         
         button {
-            padding: 12px 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s;
+            padding: 12px 20px; border: none; border-radius: 4px;
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
         }
-        
-        .login-container button { width: 100%; margin-top: 10px; }
-        
-        /* Controles do Dashboard agora incluem a busca */
+        button:hover:not(:disabled) { transform: translateY(-2px); }
+
+        .login-container button {
+            width: 100%; margin-top: 10px;
+            background-color: var(--color-brand-accent);
+            color: var(--color-brand-dark);
+        }
+
         .dashboard-controls { 
-            display: flex; 
-            justify-content: space-between; /* Alinhamento alterado */
-            align-items: center; /* Alinha verticalmente */
-            margin-bottom: 20px; 
-            gap: 20px; /* Espaçamento entre os itens */
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; gap: 20px;
         }
-
-        #searchContainer {
-            flex-grow: 1; /* Faz a busca ocupar o espaço disponível */
-        }
-        
+        #searchContainer { flex-grow: 1; }
         #logoutBtn { 
-            background-color: #dc3545; 
-            width: auto;
-            flex-shrink: 0; /* Impede que o botão encolha */
+            background-color: var(--color-danger); color: var(--color-text-primary);
+            width: auto; flex-shrink: 0;
         }
-        #logoutBtn:hover { background-color: #c82333; }
-        
-        .error-message {
-            color: #dc3545;
-            text-align: center;
-            margin-top: 10px;
-        }
+        #logoutBtn:hover { background-color: #e53935; }
 
-        .table-container {
-            overflow-x: auto;
-            border: 1px solid #eee;
-            border-radius: 4px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-            min-width: 120px;
-        }
+        .error-message { color: var(--color-danger); text-align: center; margin-top: 10px; }
+        .table-container { overflow-x: auto; border: 1px solid var(--color-border); border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
+        th, td { border: 1px solid var(--color-border); padding: 12px; text-align: left; }
         th {
-            background-color: #007bff;
-            color: white;
-            position: sticky;
-            top: 0;
+            background-color: var(--color-input-background);
+            color: var(--color-brand-accent);
+            position: sticky; top: 0;
+            text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px;
         }
-        tr:nth-child(even) { background-color: #f2f2f2; }
+        tbody tr { transition: background-color 0.2s; }
+        tbody tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.03); }
+        tbody tr:hover { background-color: var(--table-row-hover); }
         
         .editable-cell input {
-            width: 100%;
-            box-sizing: border-box;
-            border: 1px solid #007bff; /* Borda para destacar */
-            padding: 8px; /* Padding interno */
-            margin: 0;
-            background-color: #f0f8ff; /* Fundo levemente azulado */
+            width: 100%; box-sizing: border-box;
+            border: 1px solid var(--color-brand-accent); padding: 8px; margin: 0;
+            background-color: #2a2b45; color: var(--color-text-primary); font-size: 14px;
         }
-        .editable-cell {
-            padding: 2px !important;
-        }
-        .action-cell {
-            min-width: 150px; /* Aumenta a largura para caber os botões */
-            text-align: center;
-            white-space: nowrap;
-        }
+        .editable-cell { padding: 2px !important; }
+        .action-cell { min-width: 180px; text-align: center; white-space: nowrap; }
         .action-cell button {
-            padding: 5px 10px;
-            font-size: 12px;
-            margin: 0 2px;
+            padding: 5px 10px; font-size: 12px; margin: 0 2px;
+            color: var(--color-text-primary); font-weight: 500;
         }
-        .save-btn { background-color: #28a745; }
-        .save-btn:hover { background-color: #218838; }
-        .cancel-btn { background-color: #6c757d; }
-        .cancel-btn:hover { background-color: #5a6268; }
 
-        /* NOVO: Estilo para o botão de excluir */
-        .delete-btn { background-color: #dc3545; }
-        .delete-btn:hover { background-color: #c82333; }
+        .edit-btn { background-color: var(--color-warning); color: var(--color-brand-dark) !important; }
+        .save-btn { background-color: var(--color-success); }
+        .cancel-btn { background-color: var(--color-secondary); }
+        .delete-btn { background-color: var(--color-danger); }
 
-        @media (max-width: 768px) {
-            .dashboard-controls {
-                flex-direction: column;
-                align-items: stretch;
-            }
-        }
+        @media (max-width: 768px) { .dashboard-controls { flex-direction: column; align-items: stretch; } }
     </style>
 </head>
 <body>
@@ -209,8 +168,7 @@
                         <th>Ações</th> 
                     </tr>
                 </thead>
-                <tbody id="data-body">
-                    </tbody>
+                <tbody id="data-body"></tbody>
             </table>
         </div>
     </div>
@@ -219,7 +177,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <script>
-        // Configuração do Firebase
+        // SEU SCRIPT JAVASCRIPT AQUI (SEM MUDANÇAS)
+        // ... cole seu script completo que já inclui a função de excluir e buscar
         const firebaseConfig = {
             apiKey: "AIzaSyBo_NytB-SfNRGCahNUK9lH33X4stGkDnY",
             authDomain: "formulario-de-cadastro-62f0d.firebaseapp.com",
@@ -238,7 +197,7 @@
         const loginError = document.getElementById('loginError');
         const dataBody = document.getElementById('data-body');
         const logoutBtn = document.getElementById('logoutBtn');
-        const searchInput = document.getElementById('searchInput'); // NOVO: Elemento da busca
+        const searchInput = document.getElementById('searchInput');
 
         const FIELD_NAMES = [
             'Nome completo', 'Tipo de Cadastro', 'CPF', 'CNPJ', 'Data de Nascimento', 'Celular', 'Email', 
@@ -246,13 +205,11 @@
         ];
         
         let currentlyEditingRowId = null;
-        let allCustomersData = []; // NOVO: Armazena todos os dados para a busca
-
-        // --- FUNÇÕES DE EDIÇÃO E EXCLUSÃO ---
+        let allCustomersData = [];
 
         function enableEdit(rowId) {
             if (currentlyEditingRowId && currentlyEditingRowId !== rowId) {
-                cancelEdit(currentlyEditingRowId); // Cancela edição anterior para evitar conflitos
+                cancelEdit(currentlyEditingRowId);
             }
             currentlyEditingRowId = rowId;
             
@@ -260,7 +217,7 @@
             if (!row) return;
 
             row.querySelectorAll('.data-cell').forEach((cell, index) => {
-                if(index >= FIELD_NAMES.length) return; // Ignora a célula de timestamp
+                if(index >= FIELD_NAMES.length) return;
                 const fieldName = FIELD_NAMES[index];
                 const currentValue = cell.textContent.trim();
                 
@@ -294,24 +251,19 @@
             });
 
             try {
-                // Adiciona um feedback visual de "salvando"
                 const saveBtn = row.querySelector('.save-btn');
                 saveBtn.textContent = 'Salvando...';
                 saveBtn.disabled = true;
 
                 await db.collection('cadastros').doc(rowId).update(dataToUpdate);
-                
-                // NOVO: Feedback mais sutil
                 showToast('✅ Alteração salva com sucesso!');
                 
                 currentlyEditingRowId = null;
-                await loadData(); // Recarrega todos os dados para manter consistência
+                await loadData();
                 
             } catch (error) {
                 console.error("Erro ao salvar no Firestore: ", error);
                 showToast(`❌ Erro ao salvar: ${error.message}`, true);
-                
-                // Reabilita o botão em caso de erro
                 const saveBtn = row.querySelector('.save-btn');
                 saveBtn.textContent = 'Salvar';
                 saveBtn.disabled = false;
@@ -320,28 +272,21 @@
         
         function cancelEdit(rowId) {
             currentlyEditingRowId = null;
-            // Apenas re-renderiza os dados já carregados, sem ir ao banco
             renderTable(allCustomersData); 
         }
 
-        // NOVO: Função para excluir um cliente
         async function deleteCustomer(rowId) {
-            // Passo 1: Confirmação
             if (!confirm('Tem certeza que deseja excluir este cadastro? Esta ação não pode ser desfeita.')) {
                 return;
             }
 
             try {
-                // Passo 2: Deleta do Firebase
                 await db.collection('cadastros').doc(rowId).delete();
                 showToast('🗑️ Cadastro excluído com sucesso!');
-
-                // Passo 3: Remove da tela sem recarregar tudo
                 const row = document.getElementById(`row-${rowId}`);
                 if (row) {
                     row.remove();
                 }
-                // Atualiza também o array local de dados
                 allCustomersData = allCustomersData.filter(customer => customer.id !== rowId);
 
             } catch (error) {
@@ -350,30 +295,20 @@
             }
         }
 
-
-        // --- FUNÇÕES DE CARREGAMENTO E RENDERIZAÇÃO ---
-
         async function loadData() {
             dataBody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Carregando dados...</td></tr>';
-
             try {
                 const snapshot = await db.collection('cadastros').orderBy('Timestamp', 'desc').get();
-                
-                // NOVO: Mapeia e armazena os dados no array local
                 allCustomersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-                renderTable(allCustomersData); // Renderiza a tabela com os dados
-                
+                renderTable(allCustomersData);
             } catch (error) {
                 console.error("Erro ao carregar dados do Firestore: ", error);
                 dataBody.innerHTML = `<tr><td colspan="16" style="color: #dc3545; text-align:center;">Erro ao carregar dados: ${error.message}</td></tr>`;
             }
         }
 
-        // NOVO: Função separada para renderizar a tabela
         function renderTable(dataArray) {
             dataBody.innerHTML = '';
-
             if (!dataArray || dataArray.length === 0) {
                 dataBody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Nenhum cadastro encontrado.</td></tr>';
                 return;
@@ -384,9 +319,7 @@
                 const rowId = customerData.id;
                 const row = document.createElement('tr');
                 row.id = `row-${rowId}`;
-                
                 const timestamp = data.Timestamp ? new Date(data.Timestamp.seconds * 1000).toLocaleString('pt-BR') : 'N/A';
-                
                 let rowHtml = '';
 
                 FIELD_NAMES.forEach(fieldName => {
@@ -396,7 +329,6 @@
 
                 rowHtml += `<td class="timestamp-cell">${timestamp}</td>`;
                 
-                // NOVO: Adiciona o botão de excluir
                 rowHtml += `
                     <td class="action-cell">
                         <button class="edit-btn" data-id="${rowId}">Editar</button>
@@ -407,34 +339,21 @@
                 row.innerHTML = rowHtml;
                 dataBody.appendChild(row);
 
-                row.querySelector('.edit-btn').addEventListener('click', (e) => {
-                    enableEdit(e.target.dataset.id);
-                });
-
-                // NOVO: Adiciona listener para o botão de excluir
-                row.querySelector('.delete-btn').addEventListener('click', (e) => {
-                    deleteCustomer(e.target.dataset.id);
-                });
+                row.querySelector('.edit-btn').addEventListener('click', (e) => enableEdit(e.target.dataset.id));
+                row.querySelector('.delete-btn').addEventListener('click', (e) => deleteCustomer(e.target.dataset.id));
             });
         }
 
-
-        // --- LÓGICA DE BUSCA E FEEDBACK ---
-
-        // NOVO: Função para filtrar os dados da tabela
         function filterData() {
             const query = searchInput.value.toLowerCase();
-            
             const filteredData = allCustomersData.filter(customer => {
                 const name = (customer['Nome completo'] || '').toLowerCase();
                 const email = (customer['Email'] || '').toLowerCase();
                 return name.includes(query) || email.includes(query);
             });
-            
             renderTable(filteredData);
         }
 
-        // NOVO: Função para exibir notificações (Toast)
         function showToast(message, isError = false) {
             const toast = document.createElement('div');
             toast.textContent = message;
@@ -449,17 +368,12 @@
             toast.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
             toast.style.zIndex = '1000';
             toast.style.transition = 'opacity 0.5s';
-            
             document.body.appendChild(toast);
-            
             setTimeout(() => {
                 toast.style.opacity = '0';
                 setTimeout(() => toast.remove(), 500);
             }, 3000);
         }
-
-
-        // --- EVENT LISTENERS ---
 
         auth.onAuthStateChanged((user) => {
             if (user) {
@@ -483,14 +397,8 @@
                 loginError.textContent = 'Erro de login: ' + error.message;
             }
         });
-
-        logoutBtn.addEventListener('click', () => {
-            auth.signOut();
-        });
-        
-        // NOVO: Adiciona listener para a busca
+        logoutBtn.addEventListener('click', () => { auth.signOut(); });
         searchInput.addEventListener('input', filterData);
-
     </script>
 </body>
 </html>
