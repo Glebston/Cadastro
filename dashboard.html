@@ -8,9 +8,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* [INDICADOR DE AMBIENTE: TESTE 1 (Firebase Modular)] */
-        body { border-top: 5px solid orange; } 
-        /* ... Seu código CSS original (não alterado) ... */
+        /* [INDICADOR DE AMBIENTE: TESTE 2 (Com Exclusão)] */
+        /* Mantendo o seu CSS original, apenas adicionando um indicador discreto */
+        .dashboard-container { border: 2px solid #28a745; } 
+        
         body {
             font-family: 'Roboto', sans-serif;
             background-color: #f8f9fa;
@@ -35,6 +36,8 @@
             box-sizing: border-box;
             margin-top: 20px;
         }
+        
+        /* ... (O restante do seu CSS original é mantido) ... */
 
         .dashboard-container {
             display: none;
@@ -126,16 +129,20 @@
             padding: 0 !important;
         }
         .action-cell {
-            min-width: 80px;
+            min-width: 150px; /* Aumenta a largura mínima para caber 3 botões */
             text-align: center;
         }
         .action-cell button {
             padding: 5px 10px;
             font-size: 12px;
             margin-right: 5px;
+            margin-bottom: 5px; /* Adiciona margem para responsividade */
         }
         .save-btn { background-color: #28a745; }
         .save-btn:hover { background-color: #218838; }
+        /* NOVO: Estilo para o botão de exclusão */
+        .delete-btn { background-color: #ffc107; color: #333; } 
+        .delete-btn:hover { background-color: #e0a800; }
 
         @media (max-width: 768px) {
             .dashboard-container {
@@ -148,6 +155,12 @@
             .dashboard-controls button {
                 width: 48%;
                 margin: 5px 0;
+            }
+            /* Garante que os botões de ação na célula não fiquem muito grandes */
+            .action-cell {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
             }
         }
     </style>
@@ -207,10 +220,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
     <script type="module">
-        // IMPORTANTE: Adicionado type="module" e a sintaxe de import/export
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js';
         import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js';
-        import { getFirestore, collection, getDocs, orderBy, query, updateDoc, doc } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js';
+        // ADIÇÃO: deleteDoc para exclusão
+        import { getFirestore, collection, getDocs, orderBy, query, updateDoc, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js';
 
         // 1. Configuração do Firebase
         const firebaseConfig = {
@@ -241,33 +254,37 @@
         
         let currentlyEditingRowId = null;
 
-        // --- FUNÇÕES DE EDIÇÃO (Modularizadas) ---
+        // --- FUNÇÕES DE EDIÇÃO ---
 
         function enableEdit(rowId) {
             if (currentlyEditingRowId && currentlyEditingRowId !== rowId) {
-                // Se desejar, adicione aqui uma função para 'desabilitar' a edição da linha anterior
-                // no momento estamos apenas permitindo que a nova edição ocorra.
+                // Se houver outra linha em edição, não faz nada (ou você pode forçar o cancelamento).
+                return; 
             }
             currentlyEditingRowId = rowId;
             
             const row = document.getElementById(`row-${rowId}`);
             if (!row) return;
 
+            // Transforma células em inputs
             row.querySelectorAll('.data-cell').forEach((cell, index) => {
-                const fieldName = FIELD_NAMES[index];
-                const currentValue = cell.textContent.trim();
+                // A célula do Timestamp (index 14) não deve ser editável.
+                if (index < FIELD_NAMES.length) { 
+                    const fieldName = FIELD_NAMES[index];
+                    const currentValue = cell.textContent.trim();
 
-                let input = document.createElement('input');
-                input.type = 'text';
-                input.value = currentValue;
-                input.setAttribute('data-field', fieldName);
-                input.setAttribute('data-id', rowId);
-                
-                cell.innerHTML = '';
-                cell.classList.add('editable-cell');
-                cell.appendChild(input);
+                    let input = document.createElement('input');
+                    input.type = 'text';
+                    input.value = currentValue;
+                    input.setAttribute('data-field', fieldName);
+                    
+                    cell.innerHTML = '';
+                    cell.classList.add('editable-cell');
+                    cell.appendChild(input);
+                }
             });
             
+            // Troca os botões
             const actionCell = row.querySelector('.action-cell');
             actionCell.innerHTML = `
                 <button class="save-btn" data-id="${rowId}">Salvar</button>
@@ -282,22 +299,22 @@
             const row = document.getElementById(`row-${rowId}`);
             const dataToUpdate = {};
             
+            // Coleta dados dos inputs
             row.querySelectorAll('input[data-field]').forEach(input => {
                 const fieldName = input.getAttribute('data-field');
                 dataToUpdate[fieldName] = input.value;
             });
             
-            // Usando a sintaxe modular para updateDoc
             try {
                 const docRef = doc(db, 'cadastros', rowId);
                 await updateDoc(docRef, dataToUpdate);
                 alert('✅ Alteração salva com sucesso!');
                 
                 currentlyEditingRowId = null;
-                await loadData(); // Recarrega os dados
+                loadData(); // Recarrega os dados
                 
             } catch (error) {
-                console.error("Erro ao salvar no Firestore (Modular): ", error);
+                console.error("Erro ao salvar no Firestore: ", error);
                 alert(`❌ Erro ao salvar: ${error.message}`);
             }
         }
@@ -307,12 +324,30 @@
             loadData(); // Recarrega os dados originais
         }
 
-        // --- FUNÇÕES DE AUTENTICAÇÃO E CARREGAMENTO (Modularizadas) ---
+        // --- NOVO: FUNÇÃO DE EXCLUSÃO ---
+
+        async function deleteClient(rowId) {
+            if (!confirm("Tem certeza que deseja EXCLUIR este cadastro? Esta ação é irreversível.")) {
+                return;
+            }
+            
+            try {
+                const docRef = doc(db, 'cadastros', rowId);
+                // Usando a sintaxe modular para deleteDoc
+                await deleteDoc(docRef); 
+                alert('🗑️ Cadastro excluído com sucesso!');
+                loadData(); // Recarrega a tabela
+            } catch (error) {
+                console.error("Erro ao excluir o cadastro: ", error);
+                alert(`❌ Erro ao excluir: ${error.message}`);
+            }
+        }
+
+        // --- FUNÇÕES DE CARREGAMENTO ---
 
         async function loadData() {
             dataBody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Carregando dados...</td></tr>';
 
-            // Usando a sintaxe modular para consultas
             const cadastrosCol = collection(db, 'cadastros');
             const q = query(cadastrosCol, orderBy('Timestamp', 'desc'));
             
@@ -342,31 +377,37 @@
 
                     rowHtml += `<td class="data-cell">${timestamp}</td>`;
                     
+                    // Atualiza a célula de Ações com o novo botão "Excluir"
                     rowHtml += `
                         <td class="action-cell">
                             <button class="edit-btn" data-id="${rowId}">Editar</button>
+                            <button class="delete-btn" data-id="${rowId}">Excluir</button>
                         </td>
                     `;
 
                     row.innerHTML = rowHtml;
                     dataBody.appendChild(row);
 
+                    // Adiciona listeners para os botões
                     row.querySelector('.edit-btn').addEventListener('click', (e) => {
                         enableEdit(e.target.dataset.id);
                     });
+                    // NOVO: Adiciona listener para o botão de exclusão
+                    row.querySelector('.delete-btn').addEventListener('click', (e) => {
+                        deleteClient(e.target.dataset.id);
+                    });
                 });
             } catch (error) {
-                console.error("Erro ao carregar dados do Firestore (Modular): ", error);
+                console.error("Erro ao carregar dados do Firestore: ", error);
                 dataBody.innerHTML = `<tr><td colspan="16" style="color: #dc3545; text-align:center;">Erro ao carregar dados: ${error.message}</td></tr>`;
             }
         }
 
-        // 3. Monitora o estado de autenticação (Modular)
+        // 3. Monitora o estado de autenticação
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 loginContainer.style.display = 'none';
                 dashboardContainer.style.display = 'block';
-                // Garante que o loadData só rode para usuários autenticados
                 loadData();
             } else {
                 loginContainer.style.display = 'block';
@@ -374,13 +415,12 @@
             }
         });
 
-        // 4. Lógica de login (Modular)
+        // 4. Lógica de login
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             try {
-                // Usando a sintaxe modular para login
                 await signInWithEmailAndPassword(auth, email, password);
                 loginError.textContent = '';
             } catch (error) {
@@ -388,9 +428,8 @@
             }
         });
 
-        // 5. Lógica de logout (Modular)
+        // 5. Lógica de logout
         logoutBtn.addEventListener('click', () => {
-            // Usando a sintaxe modular para logout
             signOut(auth);
         });
     </script>
