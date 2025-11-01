@@ -3,19 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard de Clientes</title>
+    <title>Dashboard de Clientes - PagLucro</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        /* [INDICADOR DE AMBIENTE: TESTE 2 (Com Exclusão)] */
-        /* Mantendo o seu CSS original, apenas adicionando um indicador discreto */
-        .dashboard-container { border: 2px solid #28a745; } 
-        
+        :root {
+            --color-brand-dark: #0B0C22;
+            --color-brand-accent: #ADDC2F;
+            --color-text-primary: #FFFFFF;
+            --color-text-secondary: #d4d4d4;
+            --color-surface-background: #F8F9FA;
+            --color-border: #4A4B5A;
+            --color-input-background: #1A1B3A;
+            --color-success: #28a745;
+            --color-danger: #dc3545;
+            --color-warning: #ffc107;
+            --color-secondary: #6c757d;
+            --shadow-color: rgba(0, 0, 0, 0.25);
+            --table-row-hover: rgba(173, 220, 47, 0.1);
+        }
+
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #f8f9fa;
-            color: #333;
+            background-color: var(--color-surface-background);
+            color: var(--color-text-primary);
             line-height: 1.6;
             margin: 0;
             padding: 20px;
@@ -29,140 +41,83 @@
         .login-container, .dashboard-container {
             width: 100%;
             max-width: 1400px;
-            background-color: #fff;
+            background-color: var(--color-brand-dark);
             padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px var(--shadow-color);
+            border: 1px solid var(--color-border);
             box-sizing: border-box;
             margin-top: 20px;
         }
-        
-        /* ... (O restante do seu CSS original é mantido) ... */
-
-        .dashboard-container {
-            display: none;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        h1 {
-            text-align: center;
-            color: #007bff;
-            margin-bottom: 25px;
-            font-weight: 700;
-        }
-
+        .dashboard-container { display: none; margin-left: auto; margin-right: auto; }
+        h1 { text-align: center; color: var(--color-brand-accent); margin-bottom: 25px; font-weight: 700; }
         .form-group { margin-bottom: 1rem; }
-        label { display: block; margin-bottom: .5rem; font-weight: 500; color: #555; }
-        input[type="email"], input[type="password"] {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
+        label { display: block; margin-bottom: .5rem; font-weight: 500; color: var(--color-text-secondary); }
+        
+        input[type="email"], input[type="password"], input[type="search"] {
+            width: 100%; padding: 10px 12px;
+            background-color: var(--color-input-background); color: var(--color-text-primary);
+            border: 1px solid var(--color-border); border-radius: 4px; font-size: 16px;
             box-sizing: border-box;
         }
+        input[type="search"]::placeholder { color: var(--color-text-secondary); opacity: 0.7; }
         
         button {
-            padding: 12px 20px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s;
+            padding: 12px 20px; border: none; border-radius: 4px;
+            font-size: 16px; font-weight: 700; cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
         }
-        
-        .login-container button { width: 100%; margin-top: 10px; }
-        .dashboard-controls { display: flex; justify-content: flex-end; margin-bottom: 15px; }
+        button:hover:not(:disabled) { transform: translateY(-2px); }
 
+        .login-container button {
+            width: 100%; margin-top: 10px;
+            background-color: var(--color-brand-accent);
+            color: var(--color-brand-dark);
+        }
+
+        .dashboard-controls { 
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px; gap: 20px;
+        }
+        #searchContainer { flex-grow: 1; }
         #logoutBtn { 
-            background-color: #dc3545; 
-            margin-left: 15px;
-            width: auto;
+            background-color: var(--color-danger); color: var(--color-text-primary);
+            width: auto; flex-shrink: 0;
         }
-        #logoutBtn:hover { background-color: #c82333; }
-        
-        .error-message {
-            color: #dc3545;
-            text-align: center;
-            margin-top: 10px;
-        }
+        #logoutBtn:hover { background-color: #e53935; }
 
-        .table-container {
-            overflow-x: auto;
-            border: 1px solid #eee;
-            border-radius: 4px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 14px;
-            white-space: nowrap;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 10px;
-            text-align: left;
-            min-width: 120px;
-        }
+        .error-message { color: var(--color-danger); text-align: center; margin-top: 10px; }
+        .table-container { overflow-x: auto; border: 1px solid var(--color-border); border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
+        th, td { border: 1px solid var(--color-border); padding: 12px; text-align: left; }
         th {
-            background-color: #007bff;
-            color: white;
-            position: sticky;
-            top: 0;
+            background-color: var(--color-input-background);
+            color: var(--color-brand-accent);
+            position: sticky; top: 0;
+            text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px;
         }
-        tr:nth-child(even) { background-color: #f2f2f2; }
+        tbody tr { transition: background-color 0.2s; }
+        tbody tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.03); }
+        tbody tr:hover { background-color: var(--table-row-hover); }
         
         .editable-cell input {
-            width: 100%;
-            box-sizing: border-box;
-            border: none;
-            padding: 0;
-            margin: 0;
-            background-color: transparent;
+            width: 100%; box-sizing: border-box;
+            border: 1px solid var(--color-brand-accent); padding: 8px; margin: 0;
+            background-color: #2a2b45; color: var(--color-text-primary); font-size: 14px;
         }
-        .editable-cell {
-            padding: 0 !important;
-        }
-        .action-cell {
-            min-width: 150px; /* Aumenta a largura mínima para caber 3 botões */
-            text-align: center;
-        }
+        .editable-cell { padding: 2px !important; }
+        .action-cell { min-width: 180px; text-align: center; white-space: nowrap; }
         .action-cell button {
-            padding: 5px 10px;
-            font-size: 12px;
-            margin-right: 5px;
-            margin-bottom: 5px; /* Adiciona margem para responsividade */
+            padding: 5px 10px; font-size: 12px; margin: 0 2px;
+            color: var(--color-text-primary); font-weight: 500;
         }
-        .save-btn { background-color: #28a745; }
-        .save-btn:hover { background-color: #218838; }
-        /* NOVO: Estilo para o botão de exclusão */
-        .delete-btn { background-color: #ffc107; color: #333; } 
-        .delete-btn:hover { background-color: #e0a800; }
 
-        @media (max-width: 768px) {
-            .dashboard-container {
-                padding: 15px;
-            }
-            .dashboard-controls {
-                justify-content: space-between;
-                flex-wrap: wrap;
-            }
-            .dashboard-controls button {
-                width: 48%;
-                margin: 5px 0;
-            }
-            /* Garante que os botões de ação na célula não fiquem muito grandes */
-            .action-cell {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-        }
+        .edit-btn { background-color: var(--color-warning); color: var(--color-brand-dark) !important; }
+        .save-btn { background-color: var(--color-success); }
+        .cancel-btn { background-color: var(--color-secondary); }
+        .delete-btn { background-color: var(--color-danger); }
+
+        @media (max-width: 768px) { .dashboard-controls { flex-direction: column; align-items: stretch; } }
     </style>
 </head>
 <body>
@@ -185,6 +140,9 @@
     <div class="dashboard-container" id="dashboardContainer">
         <h1>Dashboard de Clientes</h1>
         <div class="dashboard-controls">
+            <div id="searchContainer">
+                <input type="search" id="searchInput" placeholder="🔎 Buscar por nome ou email...">
+            </div>
             <button id="logoutBtn">Sair</button>
         </div>
         
@@ -210,81 +168,69 @@
                         <th>Ações</th> 
                     </tr>
                 </thead>
-                <tbody id="data-body">
-                </tbody>
+                <tbody id="data-body"></tbody>
             </table>
         </div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js';
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js';
-        // ADIÇÃO: deleteDoc para exclusão
-        import { getFirestore, collection, getDocs, orderBy, query, updateDoc, doc, deleteDoc } from 'https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js';
-
-        // 1. Configuração do Firebase
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script>
+        // SEU SCRIPT JAVASCRIPT AQUI (SEM MUDANÇAS)
+        // ... cole seu script completo que já inclui a função de excluir e buscar
         const firebaseConfig = {
             apiKey: "AIzaSyBo_NytB-SfNRGCahNUK9lH33X4stGkDnY",
             authDomain: "formulario-de-cadastro-62f0d.firebaseapp.com",
             projectId: "formulario-de-cadastro-62f0d",
-            storageBucket: "formulario-de-cadastro-62f0d.firebasestorage.app",
+            storageBucket: "formulario-de-cadastro-62f0d.appspot.com",
             messagingSenderId: "42664296528",
             appId: "1:42664296528:web:2e31c71fcec9ebdb541155"
         };
-        
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
 
-        // 2. Referências do DOM
         const loginForm = document.getElementById('loginForm');
         const loginContainer = document.getElementById('loginContainer');
         const dashboardContainer = document.getElementById('dashboardContainer');
         const loginError = document.getElementById('loginError');
         const dataBody = document.getElementById('data-body');
         const logoutBtn = document.getElementById('logoutBtn');
-        
+        const searchInput = document.getElementById('searchInput');
+
         const FIELD_NAMES = [
             'Nome completo', 'Tipo de Cadastro', 'CPF', 'CNPJ', 'Data de Nascimento', 'Celular', 'Email', 
             'Com o que você trabalha', 'Nome da rua e nº', 'Bairro', 'CEP', 'Plano', 'Modelo', 'Forma de Pagamento'
         ];
         
         let currentlyEditingRowId = null;
-
-        // --- FUNÇÕES DE EDIÇÃO ---
+        let allCustomersData = [];
 
         function enableEdit(rowId) {
             if (currentlyEditingRowId && currentlyEditingRowId !== rowId) {
-                // Se houver outra linha em edição, não faz nada (ou você pode forçar o cancelamento).
-                return; 
+                cancelEdit(currentlyEditingRowId);
             }
             currentlyEditingRowId = rowId;
             
             const row = document.getElementById(`row-${rowId}`);
             if (!row) return;
 
-            // Transforma células em inputs
             row.querySelectorAll('.data-cell').forEach((cell, index) => {
-                // A célula do Timestamp (index 14) não deve ser editável.
-                if (index < FIELD_NAMES.length) { 
-                    const fieldName = FIELD_NAMES[index];
-                    const currentValue = cell.textContent.trim();
-
-                    let input = document.createElement('input');
-                    input.type = 'text';
-                    input.value = currentValue;
-                    input.setAttribute('data-field', fieldName);
-                    
-                    cell.innerHTML = '';
-                    cell.classList.add('editable-cell');
-                    cell.appendChild(input);
-                }
+                if(index >= FIELD_NAMES.length) return;
+                const fieldName = FIELD_NAMES[index];
+                const currentValue = cell.textContent.trim();
+                
+                let input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentValue;
+                input.setAttribute('data-field', fieldName);
+                
+                cell.innerHTML = '';
+                cell.classList.add('editable-cell');
+                cell.appendChild(input);
             });
             
-            // Troca os botões
             const actionCell = row.querySelector('.action-cell');
             actionCell.innerHTML = `
                 <button class="save-btn" data-id="${rowId}">Salvar</button>
@@ -299,112 +245,137 @@
             const row = document.getElementById(`row-${rowId}`);
             const dataToUpdate = {};
             
-            // Coleta dados dos inputs
             row.querySelectorAll('input[data-field]').forEach(input => {
                 const fieldName = input.getAttribute('data-field');
                 dataToUpdate[fieldName] = input.value;
             });
-            
+
             try {
-                const docRef = doc(db, 'cadastros', rowId);
-                await updateDoc(docRef, dataToUpdate);
-                alert('✅ Alteração salva com sucesso!');
+                const saveBtn = row.querySelector('.save-btn');
+                saveBtn.textContent = 'Salvando...';
+                saveBtn.disabled = true;
+
+                await db.collection('cadastros').doc(rowId).update(dataToUpdate);
+                showToast('✅ Alteração salva com sucesso!');
                 
                 currentlyEditingRowId = null;
-                loadData(); // Recarrega os dados
+                await loadData();
                 
             } catch (error) {
                 console.error("Erro ao salvar no Firestore: ", error);
-                alert(`❌ Erro ao salvar: ${error.message}`);
+                showToast(`❌ Erro ao salvar: ${error.message}`, true);
+                const saveBtn = row.querySelector('.save-btn');
+                saveBtn.textContent = 'Salvar';
+                saveBtn.disabled = false;
             }
         }
         
         function cancelEdit(rowId) {
             currentlyEditingRowId = null;
-            loadData(); // Recarrega os dados originais
+            renderTable(allCustomersData); 
         }
 
-        // --- NOVO: FUNÇÃO DE EXCLUSÃO ---
-
-        async function deleteClient(rowId) {
-            if (!confirm("Tem certeza que deseja EXCLUIR este cadastro? Esta ação é irreversível.")) {
+        async function deleteCustomer(rowId) {
+            if (!confirm('Tem certeza que deseja excluir este cadastro? Esta ação não pode ser desfeita.')) {
                 return;
             }
-            
+
             try {
-                const docRef = doc(db, 'cadastros', rowId);
-                // Usando a sintaxe modular para deleteDoc
-                await deleteDoc(docRef); 
-                alert('🗑️ Cadastro excluído com sucesso!');
-                loadData(); // Recarrega a tabela
+                await db.collection('cadastros').doc(rowId).delete();
+                showToast('🗑️ Cadastro excluído com sucesso!');
+                const row = document.getElementById(`row-${rowId}`);
+                if (row) {
+                    row.remove();
+                }
+                allCustomersData = allCustomersData.filter(customer => customer.id !== rowId);
+
             } catch (error) {
-                console.error("Erro ao excluir o cadastro: ", error);
-                alert(`❌ Erro ao excluir: ${error.message}`);
+                console.error("Erro ao excluir o documento: ", error);
+                showToast(`❌ Erro ao excluir: ${error.message}`, true);
             }
         }
-
-        // --- FUNÇÕES DE CARREGAMENTO ---
 
         async function loadData() {
             dataBody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Carregando dados...</td></tr>';
-
-            const cadastrosCol = collection(db, 'cadastros');
-            const q = query(cadastrosCol, orderBy('Timestamp', 'desc'));
-            
             try {
-                const snapshot = await getDocs(q);
-                dataBody.innerHTML = '';
-                
-                if (snapshot.empty) {
-                    dataBody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Nenhum cadastro encontrado.</td></tr>';
-                    return;
-                }
-
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const rowId = doc.id;
-                    const row = document.createElement('tr');
-                    row.id = `row-${rowId}`;
-                    
-                    const timestamp = data.Timestamp ? new Date(data.Timestamp.seconds * 1000).toLocaleString('pt-BR') : 'N/A';
-                    
-                    let rowHtml = '';
-
-                    FIELD_NAMES.forEach(fieldName => {
-                        const cellContent = data[fieldName] || '';
-                        rowHtml += `<td class="data-cell">${cellContent}</td>`;
-                    });
-
-                    rowHtml += `<td class="data-cell">${timestamp}</td>`;
-                    
-                    // Atualiza a célula de Ações com o novo botão "Excluir"
-                    rowHtml += `
-                        <td class="action-cell">
-                            <button class="edit-btn" data-id="${rowId}">Editar</button>
-                            <button class="delete-btn" data-id="${rowId}">Excluir</button>
-                        </td>
-                    `;
-
-                    row.innerHTML = rowHtml;
-                    dataBody.appendChild(row);
-
-                    // Adiciona listeners para os botões
-                    row.querySelector('.edit-btn').addEventListener('click', (e) => {
-                        enableEdit(e.target.dataset.id);
-                    });
-                    // NOVO: Adiciona listener para o botão de exclusão
-                    row.querySelector('.delete-btn').addEventListener('click', (e) => {
-                        deleteClient(e.target.dataset.id);
-                    });
-                });
+                const snapshot = await db.collection('cadastros').orderBy('Timestamp', 'desc').get();
+                allCustomersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderTable(allCustomersData);
             } catch (error) {
                 console.error("Erro ao carregar dados do Firestore: ", error);
                 dataBody.innerHTML = `<tr><td colspan="16" style="color: #dc3545; text-align:center;">Erro ao carregar dados: ${error.message}</td></tr>`;
             }
         }
 
-        // 3. Monitora o estado de autenticação
-        onAuthStateChanged(auth, (user) => {
+        function renderTable(dataArray) {
+            dataBody.innerHTML = '';
+            if (!dataArray || dataArray.length === 0) {
+                dataBody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Nenhum cadastro encontrado.</td></tr>';
+                return;
+            }
+
+            dataArray.forEach(customerData => {
+                const data = customerData;
+                const rowId = customerData.id;
+                const row = document.createElement('tr');
+                row.id = `row-${rowId}`;
+                const timestamp = data.Timestamp ? new Date(data.Timestamp.seconds * 1000).toLocaleString('pt-BR') : 'N/A';
+                let rowHtml = '';
+
+                FIELD_NAMES.forEach(fieldName => {
+                    const cellContent = data[fieldName] || '';
+                    rowHtml += `<td class="data-cell">${cellContent}</td>`;
+                });
+
+                rowHtml += `<td class="timestamp-cell">${timestamp}</td>`;
+                
+                rowHtml += `
+                    <td class="action-cell">
+                        <button class="edit-btn" data-id="${rowId}">Editar</button>
+                        <button class="delete-btn" data-id="${rowId}">Excluir</button>
+                    </td>
+                `;
+
+                row.innerHTML = rowHtml;
+                dataBody.appendChild(row);
+
+                row.querySelector('.edit-btn').addEventListener('click', (e) => enableEdit(e.target.dataset.id));
+                row.querySelector('.delete-btn').addEventListener('click', (e) => deleteCustomer(e.target.dataset.id));
+            });
+        }
+
+        function filterData() {
+            const query = searchInput.value.toLowerCase();
+            const filteredData = allCustomersData.filter(customer => {
+                const name = (customer['Nome completo'] || '').toLowerCase();
+                const email = (customer['Email'] || '').toLowerCase();
+                return name.includes(query) || email.includes(query);
+            });
+            renderTable(filteredData);
+        }
+
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.padding = '12px 25px';
+            toast.style.borderRadius = '6px';
+            toast.style.color = 'white';
+            toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+            toast.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
+            toast.style.zIndex = '1000';
+            toast.style.transition = 'opacity 0.5s';
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+
+        auth.onAuthStateChanged((user) => {
             if (user) {
                 loginContainer.style.display = 'none';
                 dashboardContainer.style.display = 'block';
@@ -415,23 +386,19 @@
             }
         });
 
-        // 4. Lógica de login
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
             try {
-                await signInWithEmailAndPassword(auth, email, password);
+                await auth.signInWithEmailAndPassword(email, password);
                 loginError.textContent = '';
             } catch (error) {
                 loginError.textContent = 'Erro de login: ' + error.message;
             }
         });
-
-        // 5. Lógica de logout
-        logoutBtn.addEventListener('click', () => {
-            signOut(auth);
-        });
+        logoutBtn.addEventListener('click', () => { auth.signOut(); });
+        searchInput.addEventListener('input', filterData);
     </script>
 </body>
 </html>
