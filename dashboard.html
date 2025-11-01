@@ -49,6 +49,11 @@
             box-sizing: border-box;
             margin-top: 20px;
         }
+        
+        .login-container {
+            max-width: 500px;
+        }
+
         .dashboard-container { display: none; margin-left: auto; margin-right: auto; }
         h1 { text-align: center; color: var(--color-brand-accent); margin-bottom: 25px; font-weight: 700; }
         .form-group { margin-bottom: 1rem; }
@@ -73,6 +78,7 @@
             width: 100%; margin-top: 10px;
             background-color: var(--color-brand-accent);
             color: var(--color-brand-dark);
+            text-transform: uppercase;
         }
 
         .dashboard-controls { 
@@ -86,7 +92,27 @@
         }
         #logoutBtn:hover { background-color: #e53935; }
 
-        .error-message { color: var(--color-danger); text-align: center; margin-top: 10px; }
+        .error-message {
+            color: var(--color-danger);
+            text-align: center;
+            margin-top: 10px;
+            min-height: 1.2em; /* Evita que o layout pule */
+        }
+
+        /* NOVO: Estilo para o link "Esqueci minha senha" */
+        .forgot-password-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: var(--color-text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .forgot-password-link:hover {
+            color: var(--color-brand-accent);
+            text-decoration: underline;
+        }
+
         .table-container { overflow-x: auto; border: 1px solid var(--color-border); border-radius: 4px; }
         table { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
         th, td { border: 1px solid var(--color-border); padding: 12px; text-align: left; }
@@ -126,14 +152,15 @@
         <form id="loginForm">
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" id="email" required>
+                <input type="email" id="email" required autocomplete="email">
             </div>
             <div class="form-group">
                 <label for="password">Senha</label>
-                <input type="password" id="password" required>
+                <input type="password" id="password" required autocomplete="current-password">
             </div>
             <button type="submit">Entrar</button>
             <div id="loginError" class="error-message"></div>
+            <a href="#" id="forgotPasswordLink" class="forgot-password-link">Esqueci minha senha</a>
         </form>
     </div>
 
@@ -168,7 +195,8 @@
                         <th>Ações</th> 
                     </tr>
                 </thead>
-                <tbody id="data-body"></tbody>
+                <tbody id="data-body">
+                    </tbody>
             </table>
         </div>
     </div>
@@ -176,9 +204,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    
     <script>
-        // SEU SCRIPT JAVASCRIPT AQUI (SEM MUDANÇAS)
-        // ... cole seu script completo que já inclui a função de excluir e buscar
+        // --- 1. CONFIGURAÇÃO E INICIALIZAÇÃO ---
         const firebaseConfig = {
             apiKey: "AIzaSyBo_NytB-SfNRGCahNUK9lH33X4stGkDnY",
             authDomain: "formulario-de-cadastro-62f0d.firebaseapp.com",
@@ -187,94 +215,169 @@
             messagingSenderId: "42664296528",
             appId: "1:42664296528:web:2e31c71fcec9ebdb541155"
         };
+        
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
-        const loginForm = document.getElementById('loginForm');
+        // --- 2. ELEMENTOS DO DOM ---
         const loginContainer = document.getElementById('loginContainer');
         const dashboardContainer = document.getElementById('dashboardContainer');
+        const loginForm = document.getElementById('loginForm');
         const loginError = document.getElementById('loginError');
-        const dataBody = document.getElementById('data-body');
+        const emailInput = document.getElementById('email'); // Usado para login e redefinição de senha
+        const passwordInput = document.getElementById('password');
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        
         const logoutBtn = document.getElementById('logoutBtn');
         const searchInput = document.getElementById('searchInput');
+        const dataBody = document.getElementById('data-body');
 
+        // --- 3. ESTADO GLOBAL ---
         const FIELD_NAMES = [
             'Nome completo', 'Tipo de Cadastro', 'CPF', 'CNPJ', 'Data de Nascimento', 'Celular', 'Email', 
             'Com o que você trabalha', 'Nome da rua e nº', 'Bairro', 'CEP', 'Plano', 'Modelo', 'Forma de Pagamento'
         ];
-        
         let currentlyEditingRowId = null;
-        let allCustomersData = [];
+        let allCustomersData = []; // Cache local dos dados para busca rápida
 
-        function enableEdit(rowId) {
-            if (currentlyEditingRowId && currentlyEditingRowId !== rowId) {
-                cancelEdit(currentlyEditingRowId);
-            }
-            currentlyEditingRowId = rowId;
+        // --- 4. FUNÇÕES DE AUTENTICAÇÃO ---
+
+        /**
+         * Trata a submissão do formulário de login.
+         */
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = emailInput.value;
+            const password = passwordInput.value;
             
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                loginError.textContent = ''; // Limpa o erro ao logar
+            } catch (error) {
+                console.error("Erro de login:", error.code, error.message);
+                loginError.textContent = `Erro: ${mapAuthError(error.code)}`;
+                loginError.style.color = 'var(--color-danger)';
+            }
+        }
+
+        /**
+         * NOVO: Trata o clique no link "Esqueci minha senha".
+         */
+        async function handleForgotPassword(e) {
+            e.preventDefault();
+            const email = emailInput.value;
+
+            if (!email) {
+                loginError.textContent = 'Por favor, digite seu e-mail no campo acima.';
+                loginError.style.color = 'var(--color-warning)';
+                emailInput.focus();
+                return;
+            }
+
+            loginError.textContent = 'Enviando e-mail...';
+            loginError.style.color = 'var(--color-text-secondary)';
+
+            try {
+                await auth.sendPasswordResetEmail(email);
+                loginError.textContent = '✅ E-mail de redefinição enviado! Verifique sua caixa de entrada.';
+                loginError.style.color = 'var(--color-success)';
+            } catch (error) {
+                console.error("Erro ao redefinir senha:", error.code, error.message);
+                loginError.textContent = `Erro: ${mapAuthError(error.code)}`;
+                loginError.style.color = 'var(--color-danger)';
+            }
+        }
+
+        /**
+         * NOVO: Mapeia códigos de erro do Firebase para mensagens amigáveis.
+         */
+        function mapAuthError(errorCode) {
+            switch (errorCode) {
+                case 'auth/invalid-login-credentials':
+                case 'auth/invalid-credential':
+                    return 'Email ou senha inválidos.';
+                case 'auth/user-not-found':
+                    return 'Usuário não encontrado.';
+                case 'auth/wrong-password':
+                    return 'Senha incorreta.';
+                case 'auth/invalid-email':
+                    return 'O formato do e-mail é inválido.';
+                case 'auth/missing-password':
+                    return 'Por favor, digite sua senha.';
+                default:
+                    return 'Ocorreu um erro. Tente novamente.';
+            }
+        }
+
+        /**
+         * Controla a exibição da tela de login vs. dashboard.
+         */
+        function checkAuthState(user) {
+            if (user) {
+                loginContainer.style.display = 'none';
+                dashboardContainer.style.display = 'block';
+                loadData();
+            } else {
+                loginContainer.style.display = 'block';
+                dashboardContainer.style.display = 'none';
+            }
+        }
+
+        // --- 5. FUNÇÕES DO FIRESTORE (CRUD) ---
+
+        /**
+         * Carrega os dados da coleção 'cadastros' e armazena localmente.
+         */
+        async function loadData() {
+            dataBody.innerHTML = `<tr><td colspan="${FIELD_NAMES.length + 2}" style="text-align:center;">Carregando dados...</td></tr>`;
+
+            try {
+                const snapshot = await db.collection('cadastros').orderBy('Timestamp', 'desc').get();
+                allCustomersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderTable(allCustomersData);
+            } catch (error) {
+                console.error("Erro ao carregar dados: ", error);
+                dataBody.innerHTML = `<tr><td colspan="${FIELD_NAMES.length + 2}" style="color: var(--color-danger); text-align:center;">Erro ao carregar dados: ${error.message}</td></tr>`;
+            }
+        }
+
+        /**
+         * Salva as alterações de uma linha no Firestore.
+         */
+        async function saveEdit(rowId) {
             const row = document.getElementById(`row-${rowId}`);
             if (!row) return;
 
-            row.querySelectorAll('.data-cell').forEach((cell, index) => {
-                if(index >= FIELD_NAMES.length) return;
-                const fieldName = FIELD_NAMES[index];
-                const currentValue = cell.textContent.trim();
-                
-                let input = document.createElement('input');
-                input.type = 'text';
-                input.value = currentValue;
-                input.setAttribute('data-field', fieldName);
-                
-                cell.innerHTML = '';
-                cell.classList.add('editable-cell');
-                cell.appendChild(input);
-            });
-            
-            const actionCell = row.querySelector('.action-cell');
-            actionCell.innerHTML = `
-                <button class="save-btn" data-id="${rowId}">Salvar</button>
-                <button class="cancel-btn" data-id="${rowId}">Cancelar</button>
-            `;
-            
-            actionCell.querySelector('.save-btn').addEventListener('click', () => saveEdit(rowId));
-            actionCell.querySelector('.cancel-btn').addEventListener('click', () => cancelEdit(rowId));
-        }
+            const saveBtn = row.querySelector('.save-btn');
+            saveBtn.textContent = 'Salvando...';
+            saveBtn.disabled = true;
 
-        async function saveEdit(rowId) {
-            const row = document.getElementById(`row-${rowId}`);
             const dataToUpdate = {};
-            
             row.querySelectorAll('input[data-field]').forEach(input => {
                 const fieldName = input.getAttribute('data-field');
                 dataToUpdate[fieldName] = input.value;
             });
 
             try {
-                const saveBtn = row.querySelector('.save-btn');
-                saveBtn.textContent = 'Salvando...';
-                saveBtn.disabled = true;
-
                 await db.collection('cadastros').doc(rowId).update(dataToUpdate);
                 showToast('✅ Alteração salva com sucesso!');
-                
                 currentlyEditingRowId = null;
-                await loadData();
+                
+                // Atualiza o cache local e re-renderiza a tabela
+                await loadData(); // Simples e garante consistência
                 
             } catch (error) {
-                console.error("Erro ao salvar no Firestore: ", error);
+                console.error("Erro ao salvar: ", error);
                 showToast(`❌ Erro ao salvar: ${error.message}`, true);
-                const saveBtn = row.querySelector('.save-btn');
                 saveBtn.textContent = 'Salvar';
                 saveBtn.disabled = false;
             }
         }
-        
-        function cancelEdit(rowId) {
-            currentlyEditingRowId = null;
-            renderTable(allCustomersData); 
-        }
 
+        /**
+         * Exclui um documento do Firestore e da UI.
+         */
         async function deleteCustomer(rowId) {
             if (!confirm('Tem certeza que deseja excluir este cadastro? Esta ação não pode ser desfeita.')) {
                 return;
@@ -283,67 +386,127 @@
             try {
                 await db.collection('cadastros').doc(rowId).delete();
                 showToast('🗑️ Cadastro excluído com sucesso!');
+                
+                // Remove do DOM
                 const row = document.getElementById(`row-${rowId}`);
-                if (row) {
-                    row.remove();
-                }
+                if (row) row.remove();
+                
+                // Remove do cache local
                 allCustomersData = allCustomersData.filter(customer => customer.id !== rowId);
 
             } catch (error) {
-                console.error("Erro ao excluir o documento: ", error);
+                console.error("Erro ao excluir: ", error);
                 showToast(`❌ Erro ao excluir: ${error.message}`, true);
             }
         }
 
-        async function loadData() {
-            dataBody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Carregando dados...</td></tr>';
-            try {
-                const snapshot = await db.collection('cadastros').orderBy('Timestamp', 'desc').get();
-                allCustomersData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderTable(allCustomersData);
-            } catch (error) {
-                console.error("Erro ao carregar dados do Firestore: ", error);
-                dataBody.innerHTML = `<tr><td colspan="16" style="color: #dc3545; text-align:center;">Erro ao carregar dados: ${error.message}</td></tr>`;
-            }
-        }
+        // --- 6. RENDERIZAÇÃO E MANIPULAÇÃO DA UI ---
 
+        /**
+         * Desenha as linhas da tabela com base em um array de dados.
+         */
         function renderTable(dataArray) {
             dataBody.innerHTML = '';
+            const columnsCount = FIELD_NAMES.length + 2; // Dados + Timestamp + Ações
+
             if (!dataArray || dataArray.length === 0) {
-                dataBody.innerHTML = '<tr><td colspan="16" style="text-align:center;">Nenhum cadastro encontrado.</td></tr>';
+                dataBody.innerHTML = `<tr><td colspan="${columnsCount}" style="text-align:center;">Nenhum cadastro encontrado.</td></tr>`;
                 return;
             }
 
-            dataArray.forEach(customerData => {
-                const data = customerData;
-                const rowId = customerData.id;
-                const row = document.createElement('tr');
-                row.id = `row-${rowId}`;
-                const timestamp = data.Timestamp ? new Date(data.Timestamp.seconds * 1000).toLocaleString('pt-BR') : 'N/A';
-                let rowHtml = '';
-
-                FIELD_NAMES.forEach(fieldName => {
-                    const cellContent = data[fieldName] || '';
-                    rowHtml += `<td class="data-cell">${cellContent}</td>`;
-                });
-
-                rowHtml += `<td class="timestamp-cell">${timestamp}</td>`;
+            dataArray.forEach(data => {
+                const rowId = data.id;
                 
-                rowHtml += `
-                    <td class="action-cell">
-                        <button class="edit-btn" data-id="${rowId}">Editar</button>
-                        <button class="delete-btn" data-id="${rowId}">Excluir</button>
-                    </td>
-                `;
-
-                row.innerHTML = rowHtml;
-                dataBody.appendChild(row);
-
-                row.querySelector('.edit-btn').addEventListener('click', (e) => enableEdit(e.target.dataset.id));
-                row.querySelector('.delete-btn').addEventListener('click', (e) => deleteCustomer(e.target.dataset.id));
+                // Se a linha estiver em modo de edição, renderiza com inputs
+                if (rowId === currentlyEditingRowId) {
+                    renderEditRow(data);
+                } else {
+                    renderReadRow(data);
+                }
             });
         }
 
+        /**
+         * Renderiza uma linha padrão (modo de leitura).
+         */
+        function renderReadRow(data) {
+            const rowId = data.id;
+            const row = document.createElement('tr');
+            row.id = `row-${rowId}`;
+            
+            const timestamp = data.Timestamp ? new Date(data.Timestamp.seconds * 1000).toLocaleString('pt-BR') : 'N/A';
+            
+            let rowHtml = '';
+            FIELD_NAMES.forEach(fieldName => {
+                const cellContent = data[fieldName] || '';
+                rowHtml += `<td class="data-cell">${cellContent}</td>`;
+            });
+            rowHtml += `<td class="timestamp-cell">${timestamp}</td>`;
+            rowHtml += `
+                <td class="action-cell">
+                    <button class="edit-btn" data-id="${rowId}">Editar</button>
+                    <button class="delete-btn" data-id="${rowId}">Excluir</button>
+                </td>
+            `;
+            
+            row.innerHTML = rowHtml;
+            dataBody.appendChild(row);
+        }
+
+        /**
+         * Renderiza uma linha em modo de edição.
+         */
+        function renderEditRow(data) {
+            const rowId = data.id;
+            const row = document.createElement('tr');
+            row.id = `row-${rowId}`;
+            
+            let rowHtml = '';
+            FIELD_NAMES.forEach(fieldName => {
+                const currentValue = data[fieldName] || '';
+                rowHtml += `
+                    <td class="editable-cell">
+                        <input type="text" value="${currentValue}" data-field="${fieldName}">
+                    </td>
+                `;
+            });
+
+            const timestamp = data.Timestamp ? new Date(data.Timestamp.seconds * 1000).toLocaleString('pt-BR') : 'N/A';
+            rowHtml += `<td class="timestamp-cell">${timestamp}</td>`;
+            rowHtml += `
+                <td class="action-cell">
+                    <button class="save-btn" data-id="${rowId}">Salvar</button>
+                    <button class="cancel-btn" data-id="${rowId}">Cancelar</button>
+                </td>
+            `;
+            
+            row.innerHTML = rowHtml;
+            dataBody.appendChild(row);
+        }
+
+        /**
+         * Ativa o modo de edição para uma linha específica.
+         */
+        function enableEdit(rowId) {
+            // Cancela qualquer outra edição em andamento
+            if (currentlyEditingRowId) {
+                cancelEdit(currentlyEditingRowId);
+            }
+            currentlyEditingRowId = rowId;
+            renderTable(allCustomersData); // Re-renderiza a tabela
+        }
+
+        /**
+         * Cancela o modo de edição.
+         */
+        function cancelEdit(rowId) {
+            currentlyEditingRowId = null;
+            renderTable(allCustomersData); // Re-renderiza a tabela
+        }
+
+        /**
+         * Filtra os dados da tabela com base na busca.
+         */
         function filterData() {
             const query = searchInput.value.toLowerCase();
             const filteredData = allCustomersData.filter(customer => {
@@ -354,9 +517,13 @@
             renderTable(filteredData);
         }
 
+        /**
+         * Exibe uma notificação "toast" no canto da tela.
+         */
         function showToast(message, isError = false) {
             const toast = document.createElement('div');
             toast.textContent = message;
+            // Estilos do Toast (baseados no seu CSS anterior)
             toast.style.position = 'fixed';
             toast.style.bottom = '20px';
             toast.style.left = '50%';
@@ -364,41 +531,54 @@
             toast.style.padding = '12px 25px';
             toast.style.borderRadius = '6px';
             toast.style.color = 'white';
-            toast.style.backgroundColor = isError ? '#dc3545' : '#28a745';
+            toast.style.backgroundColor = isError ? 'var(--color-danger)' : 'var(--color-success)';
             toast.style.boxShadow = '0 4px 8px rgba(0,0,0,0.2)';
             toast.style.zIndex = '1000';
             toast.style.transition = 'opacity 0.5s';
+            
             document.body.appendChild(toast);
+            
             setTimeout(() => {
                 toast.style.opacity = '0';
                 setTimeout(() => toast.remove(), 500);
             }, 3000);
         }
 
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                loginContainer.style.display = 'none';
-                dashboardContainer.style.display = 'block';
-                loadData();
-            } else {
-                loginContainer.style.display = 'block';
-                dashboardContainer.style.display = 'none';
-            }
-        });
+        // --- 7. EVENT LISTENERS GLOBAIS ---
 
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-                loginError.textContent = '';
-            } catch (error) {
-                loginError.textContent = 'Erro de login: ' + error.message;
+        /**
+         * NOVO: Ponto central para todos os cliques na tabela (Event Delegation).
+         */
+        function handleTableClick(e) {
+            const target = e.target;
+            const rowId = target.dataset.id;
+            if (!rowId) return; // Não é um botão de ação
+
+            if (target.classList.contains('edit-btn')) {
+                enableEdit(rowId);
+            } else if (target.classList.contains('delete-btn')) {
+                deleteCustomer(rowId);
+            } else if (target.classList.contains('save-btn')) {
+                saveEdit(rowId);
+            } else if (target.classList.contains('cancel-btn')) {
+                cancelEdit(rowId);
             }
-        });
-        logoutBtn.addEventListener('click', () => { auth.signOut(); });
+        }
+
+        // Monitora o estado de autenticação
+        auth.onAuthStateChanged(checkAuthState);
+
+        // Listeners do formulário de login
+        loginForm.addEventListener('submit', handleLogin);
+        forgotPasswordLink.addEventListener('click', handleForgotPassword);
+
+        // Listeners do dashboard
+        logoutBtn.addEventListener('click', () => auth.signOut());
         searchInput.addEventListener('input', filterData);
+        
+        // Listener principal da tabela
+        dataBody.addEventListener('click', handleTableClick);
+
     </script>
 </body>
 </html>
